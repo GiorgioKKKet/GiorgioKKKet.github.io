@@ -7550,6 +7550,16 @@ const ICE_SERVERS=[
   {urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'},
   ...TURN_EXTRA];
 const PEER_OPTS=(()=>{const m=location.search.match(/peerhost=([^&:]+):?(\d+)?/); const o=m?{host:m[1],port:+(m[2]||9000),path:'/',secure:false,debug:0}:{debug:0}; o.config={iceServers:ICE_SERVERS}; return o;})();
+// TURN_URL: indirizzo del Worker Cloudflare che genera credenziali TURN temporanee (vedi cloudflare-worker/turn-worker.js).
+// Vuoto = si usano solo i server pubblici qui sopra.
+const TURN_URL='';
+let ICE_SRC='pubblici';
+async function loadIce(){ if(!TURN_URL||loadIce.ok) return;
+  try{ const ac=new AbortController(), t=setTimeout(()=>ac.abort(),6000);
+    const r=await fetch(TURN_URL,{signal:ac.signal}); clearTimeout(t); if(!r.ok) throw new Error('http '+r.status);
+    const j=await r.json(); let s=j.iceServers; if(s&&!Array.isArray(s)) s=[s];
+    if(s&&s.length){ PEER_OPTS.config.iceServers=[...s,...TURN_EXTRA]; ICE_SRC='Cloudflare'; loadIce.ok=true; }
+  }catch(e){ ICE_SRC='pubblici (Cloudflare non raggiunto)'; } }
 function netErrText(e){ const t=(e&&e.type)||String(e);
   if(t==='network'||t==='server-error'||t==='socket-error'||t==='socket-closed') return `⚠️ Non riesco a raggiungere il server di aggancio PeerJS (${t}). Controlla la connessione e riprova tra poco.`;
   if(t==='webrtc'||t==='negotiation-failed') return `⚠️ La rete blocca il collegamento diretto con l'host (${t}): con i dati mobili succede spesso. Prova con entrambi sullo stesso Wi-Fi; per giocare da reti diverse serve un server TURN.`;
@@ -7573,11 +7583,11 @@ function netPanelUpd(msg){
   if(msg!==undefined) NET.panelMsg=msg; const html=netPanelHTML(NET.panelMsg); if(html!==netPanel._h){ netPanel._h=html; netPanel.innerHTML=html; } }
 function netPanelHTML(msg){
   const list=[...NET.conns.values()].sort((a,b)=>a.slot-b.slot).map(c=>`📱 P${c.slot+1} · ${c.ci>=0?CHARS[c.ci].n:'sceglie…'}`).join('<br>');
-  return msg?msg:`🌐 STANZA <b>${NET.code}</b><br>${list||'Nessuno collegato'}${NET.tryN?`<br>📶 ${NET.tryN} in collegamento…`:''}${started?'':'<br><span style="opacity:.75">Fino a 7 collegati · rete v3</span>'}`;
+  return msg?msg:`🌐 STANZA <b>${NET.code}</b><br>${list||'Nessuno collegato'}${NET.tryN?`<br>📶 ${NET.tryN} in collegamento…`:''}${started?'':'<br><span style="opacity:.75">Fino a 7 collegati · rete v4 · TURN '+ICE_SRC+'</span>'}`;
 }
 async function hostOpen(){
   NET.host=true; NET.ev=[]; netPanelUpd('🌐 Apro la stanza…');
-  try{ await loadPeer(); }catch(e){ netPanelUpd('⚠️ Non riesco a caricare PeerJS: serve internet per aprire la stanza'); return; }
+  try{ await loadPeer(); }catch(e){ netPanelUpd('⚠️ Non riesco a caricare PeerJS: serve internet per aprire la stanza'); return; } await loadIce();
   const tryOpen=()=>{ NET.code=newCode(); const pr=new Peer('bdm-lan-'+NET.code,PEER_OPTS); NET.peer=pr;
     pr.on('open',()=>{ NET.panelMsg=''; netPanelUpd(); if(!started) showMenu(); });
     pr.on('error',e=>{ if(e.type==='unavailable-id'){ try{pr.destroy();}catch(_){} tryOpen(); } else if(e.type!=='peer-unavailable') netPanelUpd(netErrText(e)); });
@@ -7631,7 +7641,7 @@ function netHostTick(raw){
 function netStatus(m){ NET.status=m===undefined?(NET.slot>=0?`✅ Collegato alla stanza ${NET.code} come Giocatore ${NET.slot+1}. Aspetta che l'host scelga modalità e mappa e avvii la partita.`:''):m; const e=document.getElementById('netst'); if(e) e.innerHTML=NET.status; }
 function netLobbyHTML(){
   const on=NET.conn&&NET.conn.open;
-  menuEl.innerHTML=`<h1>BILOCALE DEATHMATCH</h1><h2>🌐 Unisciti a una stanza <span style="opacity:.5;font-size:.6em">rete v3</span></h2>
+  menuEl.innerHTML=`<h1>BILOCALE DEATHMATCH</h1><h2>🌐 Unisciti a una stanza <span style="opacity:.5;font-size:.6em">rete v4</span></h2>
     ${NET.resHTML||''}
     ${on?'':`<div class="row"><input class="netcode" id="netCode" maxlength="4" placeholder="CODE" autocomplete="off" autocapitalize="characters" value="${NET.code||''}"><button class="btn" id="netGo">Collegati</button></div>
     <p class="sub">Il codice lo trovi sullo schermo di chi ha premuto <b>🏠 Crea stanza</b>.</p>`}
@@ -7649,7 +7659,7 @@ try{ const v=localStorage.getItem('bdm_netchar'); if(v!==null) NET.myChar=+v; }c
 async function clientConnect(code){
   clearTimeout(NET.joinT); clearInterval(NET.iceT);
   netStatus('⏳ Passo 1/3 · Scarico PeerJS…');
-  try{ await loadPeer(); }catch(e){ netStatus('⚠️ Passo 1/3 fallito · Non riesco a scaricare PeerJS: la rete blocca jsdelivr/unpkg o manca internet'); return; }
+  try{ await loadPeer(); }catch(e){ netStatus('⚠️ Passo 1/3 fallito · Non riesco a scaricare PeerJS: la rete blocca jsdelivr/unpkg o manca internet'); return; } await loadIce();
   if(NET.peer){ try{NET.peer.destroy();}catch(_){} }
   netStatus('⏳ Passo 2/3 · Contatto il server di aggancio PeerJS…');
   const pr=new Peer(undefined,PEER_OPTS); NET.peer=pr; NET.code=code;
@@ -7659,8 +7669,8 @@ async function clientConnect(code){
     const t0=Date.now();
     NET.iceT=setInterval(()=>{ if(NET.peer!==pr||conn.open){ clearInterval(NET.iceT); return; }
       const pc=conn.peerConnection, ice=pc?pc.iceConnectionState:'-', s=Math.round((Date.now()-t0)/1000);
-      if(s>=25||ice==='failed'){ clearInterval(NET.iceT); netStatus(netErrText({type:'negotiation-failed'})+` <span style="opacity:.7">[ICE: ${ice}]</span>`); return; }
-      netStatus(`⏳ Passo 3/3 · Server raggiunto, collegamento diretto con la stanza ${code}… <span style="opacity:.7">[ICE: ${ice} · ${s}s]</span>`); },1000);
+      if(s>=25||ice==='failed'){ clearInterval(NET.iceT); netStatus(netErrText({type:'negotiation-failed'})+` <span style="opacity:.7">[ICE: ${ice} · TURN ${ICE_SRC}]</span>`); return; }
+      netStatus(`⏳ Passo 3/3 · Server raggiunto, collegamento diretto con la stanza ${code}… <span style="opacity:.7">[ICE: ${ice} · ${s}s · TURN ${ICE_SRC}]</span>`); },1000);
     conn.on('open',()=>{ clearInterval(NET.iceT); NET.client=true; conn.send({k:'char',ci:NET.myChar}); showMenu(); });
     conn.on('data',clientData);
     conn.on('close',()=>clientLost()); conn.on('error',()=>clientLost()); });
