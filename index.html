@@ -7541,12 +7541,26 @@ titleShow();
 // Il browser non puo' fare da server vero: l'host apre una "stanza" WebRTC con un codice di 4 lettere.
 // Il codice passa una volta dal server di aggancio pubblico di PeerJS (serve internet solo per collegarsi), poi i dati viaggiano diretti in LAN.
 // L'host fa girare tutta la partita; ai client arrivano 20 volte al secondo posizioni, eventi (colpi, effetti, suoni) e l'HUD; i client mandano solo i comandi.
-const PEER_SRC='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
-const PEER_OPTS=(()=>{const m=location.search.match(/peerhost=([^&:]+):?(\d+)?/); return m?{host:m[1],port:+(m[2]||9000),path:'/',secure:false,debug:0}:{debug:0};})();
+const PEER_SRCS=['https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js','https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js'];
+// Server ICE: STUN per trovare l'indirizzo pubblico, TURN per far passare i dati quando la rete (es. 4G/5G) blocca il collegamento diretto.
+// TURN_EXTRA: qui vanno aggiunti eventuali server TURN propri (es. Cloudflare), nel formato {urls:[...],username:'...',credential:'...'}
+const TURN_EXTRA=[];
+const ICE_SERVERS=[
+  {urls:['stun:stun.cloudflare.com:3478','stun:stun.l.google.com:19302']},
+  {urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'},
+  ...TURN_EXTRA];
+const PEER_OPTS=(()=>{const m=location.search.match(/peerhost=([^&:]+):?(\d+)?/); const o=m?{host:m[1],port:+(m[2]||9000),path:'/',secure:false,debug:0}:{debug:0}; o.config={iceServers:ICE_SERVERS}; return o;})();
+function netErrText(e){ const t=(e&&e.type)||String(e);
+  if(t==='network'||t==='server-error'||t==='socket-error'||t==='socket-closed') return `⚠️ Non riesco a raggiungere il server di aggancio PeerJS (${t}). Controlla la connessione e riprova tra poco.`;
+  if(t==='webrtc'||t==='negotiation-failed') return `⚠️ La rete blocca il collegamento diretto con l'host (${t}): con i dati mobili succede spesso. Prova con entrambi sullo stesso Wi-Fi; per giocare da reti diverse serve un server TURN.`;
+  if(t==='browser-incompatible') return '⚠️ Questo browser non supporta il gioco in rete: prova con Chrome o Safari aggiornati.';
+  return '⚠️ Rete: '+t; }
 const CODE_AB='ABCDEFGHJKLMNPQRSTUVWXYZ';
 const newCode=()=>Array.from({length:4},()=>CODE_AB[Math.random()*CODE_AB.length|0]).join('');
 const netPanel=document.getElementById('netPanel');
-function loadPeer(){ return new Promise((res,rej)=>{ if(window.Peer) return res(); const sc=document.createElement('script'); sc.src=PEER_SRC; sc.onload=()=>res(); sc.onerror=()=>rej(new Error('peerjs')); document.head.appendChild(sc); }); }
+function loadPeer(){ return new Promise((res,rej)=>{ if(window.Peer) return res(); let k=0;
+  const next=()=>{ if(k>=PEER_SRCS.length) return rej(new Error('peerjs')); const sc=document.createElement('script'); sc.src=PEER_SRCS[k++]; sc.onload=()=>window.Peer?res():next(); sc.onerror=()=>{ sc.remove(); next(); }; document.head.appendChild(sc); };
+  next(); }); }
 NET.isRemote=i=>{ if(i<=0) return false; for(const c of NET.conns.values()) if(c.slot===i) return true; return false; };
 NET.clientAt=i=>{ for(const c of NET.conns.values()) if(c.slot===i) return c; return null; };
 NET.pickFor=(i,taken)=>{ const c=NET.clientAt(i); if(c&&c.ci>=0&&c.ci<CHARS.length&&!taken.includes(c.ci)) return c.ci; const free=CHARS.map((_,j)=>j).filter(j=>!taken.includes(j)); return free[Math.random()*free.length|0]; };
@@ -7566,7 +7580,7 @@ async function hostOpen(){
   try{ await loadPeer(); }catch(e){ netPanelUpd('⚠️ Non riesco a caricare PeerJS: serve internet per aprire la stanza'); return; }
   const tryOpen=()=>{ NET.code=newCode(); const pr=new Peer('bdm-lan-'+NET.code,PEER_OPTS); NET.peer=pr;
     pr.on('open',()=>{ NET.panelMsg=''; netPanelUpd(); if(!started) showMenu(); });
-    pr.on('error',e=>{ if(e.type==='unavailable-id'){ try{pr.destroy();}catch(_){} tryOpen(); } else if(e.type!=='peer-unavailable') netPanelUpd('⚠️ Rete: '+(e.type||e)); });
+    pr.on('error',e=>{ if(e.type==='unavailable-id'){ try{pr.destroy();}catch(_){} tryOpen(); } else if(e.type!=='peer-unavailable') netPanelUpd(netErrText(e)); });
     pr.on('disconnected',()=>{ try{pr.reconnect();}catch(_){} });
     pr.on('connection',hostConn); };
   tryOpen();
@@ -7634,9 +7648,10 @@ async function clientConnect(code){
   try{ await loadPeer(); }catch(e){ netStatus('⚠️ Non riesco a caricare PeerJS: serve internet per collegarsi la prima volta'); return; }
   if(NET.peer){ try{NET.peer.destroy();}catch(_){} }
   const pr=new Peer(undefined,PEER_OPTS); NET.peer=pr; NET.code=code;
-  pr.on('error',e=>netStatus(e.type==='peer-unavailable'?`⚠️ Stanza ${code} non trovata: controlla il codice e che la stanza sia ancora aperta`:'⚠️ Rete: '+(e.type||e)));
+  pr.on('error',e=>{ clearTimeout(NET.joinT); netStatus(e.type==='peer-unavailable'?`⚠️ Stanza ${code} non trovata: controlla il codice e che la stanza sia ancora aperta`:netErrText(e)); });
   pr.on('open',()=>{ const conn=pr.connect('bdm-lan-'+code,{reliable:true,serialization:'json'}); NET.conn=conn;
-    conn.on('open',()=>{ NET.client=true; conn.send({k:'char',ci:NET.myChar}); showMenu(); });
+    clearTimeout(NET.joinT); NET.joinT=setTimeout(()=>{ if(NET.peer===pr&&!(conn&&conn.open)) netStatus(netErrText({type:'negotiation-failed'})); },20000);
+    conn.on('open',()=>{ clearTimeout(NET.joinT); NET.client=true; conn.send({k:'char',ci:NET.myChar}); showMenu(); });
     conn.on('data',clientData);
     conn.on('close',()=>clientLost()); conn.on('error',()=>clientLost()); });
 }
