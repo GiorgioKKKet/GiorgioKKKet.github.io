@@ -151,8 +151,9 @@
 (()=>{const sh=THREE.Color.prototype.setHex;THREE.Color.prototype.setHex=function(h){sh.call(this,h);return this.convertSRGBToLinear();};})();
 
 // ================= RETE (LAN): stato condiviso =================
-// nel file server.html NET_ROLE vale 'host' (apre la stanza e fa girare la partita); nel gioco normale 'client' (puo' collegarsi)
-const NET_ROLE='client';
+// NET_ROLE: 'client' all'avvio (puo' unirsi a una stanza); diventa 'host' quando si preme "Crea stanza" dal menu
+// (oppure subito, aprendo il gioco con ?host nell'indirizzo): l'host apre la stanza e fa girare la partita
+let NET_ROLE=/[?&]host(&|=|$)/.test(location.search)?'host':'client';
 const NET={host:false,client:false,view:false,allow:false,ev:null,rin:Array(8).fill(null),slot:-1,code:'',conns:new Map(),peer:null,conn:null,idc:0,acc:0,iacc:0,tapN:0,lastDom:{},dom:{},resHTML:'',myChar:-1,status:''};
 const NETON=()=>NET.client&&NET.view;          // il client sta mostrando la partita dell'host: niente logica di gioco in locale
 const COOP=()=>MODE==='survival'||MODE==='tower';   // modalita' in cui i giocatori combattono insieme
@@ -6567,9 +6568,10 @@ function showMenu(){
   } else if(!menu.mode){
     menuEl.innerHTML=`<h1>BILOCALE DEATHMATCH</h1>${lastResult?resultsHTML(lastResult):''}${NET_ROLE==='host'?netHostHint():''}<h2>Scegli la modalità</h2><div class="row">
       ${Object.entries(MODES).filter(([k])=>!(NET_ROLE==='host'&&isMobileMode(k))).sort((a,b)=>IS_TOUCH?isMobileMode(b[0])-isMobileMode(a[0]):0).map(([k,m])=>`<button class="card mode" data-mode="${k}"><b>${m.name}</b><span>${m.desc()}</span></button>`).join('')}</div>
-      <div class="row">${IS_TOUCH?`<button class="btn" id="fsb" style="border-color:#ffd54f">${fsOn()?'⛶ Esci da schermo intero':'⛶ Schermo intero'}</button>`:''}${NET_ROLE==='client'?'<button class="btn" id="netb">🌐 Gioca in rete (stessa Wi-Fi)</button>':''}<button class="btn" id="opt">⚙️ Impostazioni</button>${IS_TOUCH?'':`<button class="btn" id="fsb">${fsOn()?'⛶ Esci da schermo intero':'⛶ Schermo intero'}</button>`}<button class="btn" id="lb">🏆 Classifica</button><button class="btn" id="ctl">🎮 Comandi</button></div>${keysP}`;
+      <div class="row">${IS_TOUCH?`<button class="btn" id="fsb" style="border-color:#ffd54f">${fsOn()?'⛶ Esci da schermo intero':'⛶ Schermo intero'}</button>`:''}${NET_ROLE==='client'&&!NET.client?'<button class="btn" id="neth" style="border-color:#ffd54f">🏠 Crea stanza</button><button class="btn" id="netb">🌐 Unisciti a una stanza</button>':''}<button class="btn" id="opt">⚙️ Impostazioni</button>${IS_TOUCH?'':`<button class="btn" id="fsb">${fsOn()?'⛶ Esci da schermo intero':'⛶ Schermo intero'}</button>`}<button class="btn" id="lb">🏆 Classifica</button><button class="btn" id="ctl">🎮 Comandi</button></div>${keysP}`;
     document.getElementById('ctl').onclick=()=>{menu.sub='ctrl';showMenu();};
     const nb=document.getElementById('netb'); if(nb) nb.onclick=()=>{menu.sub='net';showMenu();};
+    const nh=document.getElementById('neth'); if(nh) nh.onclick=()=>{ NET_ROLE='host'; hostOpen(); showMenu(); };
     document.getElementById('fsb').onclick=()=>goFullscreen(false);
     menuEl.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{menu.mode=b.dataset.mode;showMenu();});
     document.getElementById('opt').onclick=()=>{menu.sub='set';showMenu();};
@@ -7535,7 +7537,7 @@ function loop(t){
 const CAMP=new THREE.Vector3();
 applySettings();
 titleShow();
-// ================= RETE IN LAN: host (server.html) e client =================
+// ================= RETE: host ("Crea stanza") e client ("Unisciti a una stanza") =================
 // Il browser non puo' fare da server vero: l'host apre una "stanza" WebRTC con un codice di 4 lettere.
 // Il codice passa una volta dal server di aggancio pubblico di PeerJS (serve internet solo per collegarsi), poi i dati viaggiano diretti in LAN.
 // L'host fa girare tutta la partita; ai client arrivano 20 volte al secondo posizioni, eventi (colpi, effetti, suoni) e l'HUD; i client mandano solo i comandi.
@@ -7551,13 +7553,13 @@ NET.pickFor=(i,taken)=>{ const c=NET.clientAt(i); if(c&&c.ci>=0&&c.ci<CHARS.leng
 function netSendAll(m){ for(const c of NET.conns.values()) if(c.conn.open){ try{c.conn.send(m);}catch(_){} } }
 
 // ---------- HOST ----------
-function netHostHint(){ return NET.code?`<p class="sub" style="color:#ffd54f">🌐 Stanza <b>${NET.code}</b>: sui telefoni apri il gioco → 🌐 Gioca in rete → scrivi il codice. Ogni telefono collegato prende il posto P2, P3… (fino a P8 nelle mappe giganti): scegli abbastanza giocatori.</p>`:''; }
+function netHostHint(){ return NET.code?`<p class="sub" style="color:#ffd54f">🌐 Stanza <b>${NET.code}</b>: sugli altri dispositivi apri il gioco → 🌐 Unisciti a una stanza → scrivi il codice. Ogni dispositivo collegato prende il posto P2, P3… (fino a P8 nelle mappe giganti): scegli abbastanza giocatori.</p>`:''; }
 function netPanelUpd(msg){
   if(!NET.host) return; netPanel.style.display='block'; netPanel.classList.toggle('small',started);
   if(msg!==undefined) NET.panelMsg=msg; const html=netPanelHTML(NET.panelMsg); if(html!==netPanel._h){ netPanel._h=html; netPanel.innerHTML=html; } }
 function netPanelHTML(msg){
   const list=[...NET.conns.values()].sort((a,b)=>a.slot-b.slot).map(c=>`📱 P${c.slot+1} · ${c.ci>=0?CHARS[c.ci].n:'sceglie…'}`).join('<br>');
-  return msg?msg:`🌐 STANZA <b>${NET.code}</b><br>${list||'Nessun telefono collegato'}${started?'':'<br><span style="opacity:.75">Stessa Wi-Fi · fino a 7 collegati</span>'}`;
+  return msg?msg:`🌐 STANZA <b>${NET.code}</b><br>${list||'Nessuno collegato'}${started?'':'<br><span style="opacity:.75">Fino a 7 collegati</span>'}`;
 }
 async function hostOpen(){
   NET.host=true; NET.ev=[]; netPanelUpd('🌐 Apro la stanza…');
@@ -7612,10 +7614,10 @@ function netHostTick(raw){
 function netStatus(m){ NET.status=m===undefined?(NET.slot>=0?`✅ Collegato alla stanza ${NET.code} come Giocatore ${NET.slot+1}. Aspetta che l'host scelga modalità e mappa e avvii la partita.`:''):m; const e=document.getElementById('netst'); if(e) e.innerHTML=NET.status; }
 function netLobbyHTML(){
   const on=NET.conn&&NET.conn.open;
-  menuEl.innerHTML=`<h1>BILOCALE DEATHMATCH</h1><h2>🌐 Gioco in rete · stessa Wi-Fi</h2>
+  menuEl.innerHTML=`<h1>BILOCALE DEATHMATCH</h1><h2>🌐 Unisciti a una stanza</h2>
     ${NET.resHTML||''}
     ${on?'':`<div class="row"><input class="netcode" id="netCode" maxlength="4" placeholder="CODE" autocomplete="off" autocapitalize="characters" value="${NET.code||''}"><button class="btn" id="netGo">Collegati</button></div>
-    <p class="sub">Il codice lo trovi sullo schermo dove è aperto <b>server.html</b>.</p>`}
+    <p class="sub">Il codice lo trovi sullo schermo di chi ha premuto <b>🏠 Crea stanza</b>.</p>`}
     <p class="netst" id="netst">${NET.status||''}</p>
     <h2>Il tuo personaggio</h2><div class="chips">${CHARS.map((c,k)=>`<button class="chip ${NET.myChar===k?'on':''}" data-ch="${k}">${c.n}</button>`).join('')}<button class="chip ${NET.myChar<0?'on':''}" data-ch="-1">🎲 Casuale</button></div>
     <div class="row"><button class="btn" id="back">${on?'Esci dalla stanza':'⟵ Indietro'}</button></div>`;
@@ -7632,7 +7634,7 @@ async function clientConnect(code){
   try{ await loadPeer(); }catch(e){ netStatus('⚠️ Non riesco a caricare PeerJS: serve internet per collegarsi la prima volta'); return; }
   if(NET.peer){ try{NET.peer.destroy();}catch(_){} }
   const pr=new Peer(undefined,PEER_OPTS); NET.peer=pr; NET.code=code;
-  pr.on('error',e=>netStatus(e.type==='peer-unavailable'?`⚠️ Stanza ${code} non trovata: controlla il codice e che server.html sia aperto`:'⚠️ Rete: '+(e.type||e)));
+  pr.on('error',e=>netStatus(e.type==='peer-unavailable'?`⚠️ Stanza ${code} non trovata: controlla il codice e che la stanza sia ancora aperta`:'⚠️ Rete: '+(e.type||e)));
   pr.on('open',()=>{ const conn=pr.connect('bdm-lan-'+code,{reliable:true,serialization:'json'}); NET.conn=conn;
     conn.on('open',()=>{ NET.client=true; conn.send({k:'char',ci:NET.myChar}); showMenu(); });
     conn.on('data',clientData);
@@ -7645,7 +7647,7 @@ function clientData(d){
   if(d.k==='shopst'){ SHOP.st=d.st; const ov=document.getElementById('shopov'); if(ov) shopRender(ov,d.msg); return; }
   if(d.k==='shopx'){ const ov=document.getElementById('shopov'); if(ov) ov.remove(); return; }
   if(d.k==='hello'){ NET.slot=d.slot; netStatus(); }
-  else if(d.k==='full'){ netStatus('⚠️ La stanza è piena (massimo 7 telefoni)'); }
+  else if(d.k==='full'){ netStatus('⚠️ La stanza è piena (massimo 7 giocatori collegati)'); }
   else if(d.k==='res'){ NET.resHTML=d.html; if(!NET.view&&menu.sub==='net') showMenu(); }
   else if(d.k==='s') clientSnap(d);
 }
