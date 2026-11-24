@@ -6568,10 +6568,11 @@ function showMenu(){
   } else if(!menu.mode){
     menuEl.innerHTML=`<h1>BILOCALE DEATHMATCH</h1>${lastResult?resultsHTML(lastResult):''}${NET_ROLE==='host'?netHostHint():''}<h2>Scegli la modalità</h2><div class="row">
       ${Object.entries(MODES).filter(([k])=>!(NET_ROLE==='host'&&isMobileMode(k))).sort((a,b)=>IS_TOUCH?isMobileMode(b[0])-isMobileMode(a[0]):0).map(([k,m])=>`<button class="card mode" data-mode="${k}"><b>${m.name}</b><span>${m.desc()}</span></button>`).join('')}</div>
-      <div class="row">${IS_TOUCH?`<button class="btn" id="fsb" style="border-color:#ffd54f">${fsOn()?'⛶ Esci da schermo intero':'⛶ Schermo intero'}</button>`:''}${NET_ROLE==='client'&&!NET.client?'<button class="btn" id="neth" style="border-color:#ffd54f">🏠 Crea stanza</button><button class="btn" id="netb">🌐 Unisciti a una stanza</button>':''}<button class="btn" id="opt">⚙️ Impostazioni</button>${IS_TOUCH?'':`<button class="btn" id="fsb">${fsOn()?'⛶ Esci da schermo intero':'⛶ Schermo intero'}</button>`}<button class="btn" id="lb">🏆 Classifica</button><button class="btn" id="ctl">🎮 Comandi</button></div>${keysP}`;
+      <div class="row">${IS_TOUCH?`<button class="btn" id="fsb" style="border-color:#ffd54f">${fsOn()?'⛶ Esci da schermo intero':'⛶ Schermo intero'}</button>`:''}${NET_ROLE==='client'&&!NET.client?'<button class="btn" id="neth" style="border-color:#ffd54f">🏠 Crea stanza</button><button class="btn" id="netb">🌐 Unisciti a una stanza</button><button class="btn" id="nett">🔑 TURN: '+(turnUrl()?'attivo':'non impostato')+'</button>':''}<button class="btn" id="opt">⚙️ Impostazioni</button>${IS_TOUCH?'':`<button class="btn" id="fsb">${fsOn()?'⛶ Esci da schermo intero':'⛶ Schermo intero'}</button>`}<button class="btn" id="lb">🏆 Classifica</button><button class="btn" id="ctl">🎮 Comandi</button></div>${keysP}`;
     document.getElementById('ctl').onclick=()=>{menu.sub='ctrl';showMenu();};
     const nb=document.getElementById('netb'); if(nb) nb.onclick=()=>{menu.sub='net';showMenu();};
     const nh=document.getElementById('neth'); if(nh) nh.onclick=()=>{ NET_ROLE='host'; hostOpen(); showMenu(); };
+    const nt=document.getElementById('nett'); if(nt) nt.onclick=()=>{ turnSet(); showMenu(); };
     document.getElementById('fsb').onclick=()=>goFullscreen(false);
     menuEl.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{menu.mode=b.dataset.mode;showMenu();});
     document.getElementById('opt').onclick=()=>{menu.sub='set';showMenu();};
@@ -7550,16 +7551,24 @@ const ICE_SERVERS=[
   {urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'},
   ...TURN_EXTRA];
 const PEER_OPTS=(()=>{const m=location.search.match(/peerhost=([^&:]+):?(\d+)?/); const o=m?{host:m[1],port:+(m[2]||9000),path:'/',secure:false,debug:0}:{debug:0}; o.config={iceServers:ICE_SERVERS}; return o;})();
-// TURN_URL: indirizzo del Worker Cloudflare che genera credenziali TURN temporanee (vedi cloudflare-worker/turn-worker.js).
-// Vuoto = si usano solo i server pubblici qui sopra.
-const TURN_URL='';
+// TURN personale: l'indirizzo delle credenziali (es. Metered, con la apiKey dentro) NON sta nel codice.
+// Lo inserisce il giocatore dal menu (🔑 TURN) e resta salvato solo nel suo browser (localStorage 'bdm_turn').
+// Senza indirizzo si usano solo i server pubblici qui sopra.
+function turnUrl(){ try{ return localStorage.getItem('bdm_turn')||''; }catch(_){ return ''; } }
+function turnSet(){
+  const cur=turnUrl();
+  const v=prompt('Indirizzo delle credenziali TURN (es. https://….metered.live/api/v1/turn/credentials?apiKey=…).\nResta salvato solo su questo dispositivo. Lascia vuoto per toglierlo.',cur);
+  if(v===null) return; const u=v.trim();
+  if(u&&!/^https:\/\/[^\s]+$/.test(u)){ alert('Deve essere un indirizzo che inizia con https://'); return; }
+  try{ if(u) localStorage.setItem('bdm_turn',u); else localStorage.removeItem('bdm_turn'); }catch(_){ alert('Questo browser non permette di salvare l\'indirizzo'); return; }
+  loadIce.ok=false; PEER_OPTS.config.iceServers=ICE_SERVERS; ICE_SRC='pubblici'; }
 let ICE_SRC='pubblici';
-async function loadIce(){ if(!TURN_URL||loadIce.ok) return;
+async function loadIce(){ const url=turnUrl(); if(!url||loadIce.ok) return;
   try{ const ac=new AbortController(), t=setTimeout(()=>ac.abort(),6000);
-    const r=await fetch(TURN_URL,{signal:ac.signal}); clearTimeout(t); if(!r.ok) throw new Error('http '+r.status);
+    const r=await fetch(url,{signal:ac.signal}); clearTimeout(t); if(!r.ok) throw new Error('http '+r.status);
     const j=await r.json(); let s=Array.isArray(j)?j:j.iceServers; if(s&&!Array.isArray(s)) s=[s];
-    if(s&&s.length){ PEER_OPTS.config.iceServers=[...s,...TURN_EXTRA]; ICE_SRC='Cloudflare'; loadIce.ok=true; }
-  }catch(e){ ICE_SRC='pubblici (Cloudflare non raggiunto)'; } }
+    if(s&&s.length){ PEER_OPTS.config.iceServers=[...s,...TURN_EXTRA]; ICE_SRC='personale'; loadIce.ok=true; }
+  }catch(e){ ICE_SRC='pubblici (TURN personale non raggiunto)'; } }
 function netErrText(e){ const t=(e&&e.type)||String(e);
   if(t==='network'||t==='server-error'||t==='socket-error'||t==='socket-closed') return `⚠️ Non riesco a raggiungere il server di aggancio PeerJS (${t}). Controlla la connessione e riprova tra poco.`;
   if(t==='webrtc'||t==='negotiation-failed') return `⚠️ La rete blocca il collegamento diretto con l'host (${t}): con i dati mobili succede spesso. Prova con entrambi sullo stesso Wi-Fi; per giocare da reti diverse serve un server TURN.`;
@@ -7583,7 +7592,7 @@ function netPanelUpd(msg){
   if(msg!==undefined) NET.panelMsg=msg; const html=netPanelHTML(NET.panelMsg); if(html!==netPanel._h){ netPanel._h=html; netPanel.innerHTML=html; } }
 function netPanelHTML(msg){
   const list=[...NET.conns.values()].sort((a,b)=>a.slot-b.slot).map(c=>`📱 P${c.slot+1} · ${c.ci>=0?CHARS[c.ci].n:'sceglie…'}`).join('<br>');
-  return msg?msg:`🌐 STANZA <b>${NET.code}</b><br>${list||'Nessuno collegato'}${NET.tryN?`<br>📶 ${NET.tryN} in collegamento…`:''}${started?'':'<br><span style="opacity:.75">Fino a 7 collegati · rete v4 · TURN '+ICE_SRC+'</span>'}`;
+  return msg?msg:`🌐 STANZA <b>${NET.code}</b><br>${list||'Nessuno collegato'}${NET.tryN?`<br>📶 ${NET.tryN} in collegamento…`:''}${started?'':'<br><span style="opacity:.75">Fino a 7 collegati · rete v5 · TURN '+ICE_SRC+'</span>'}`;
 }
 async function hostOpen(){
   NET.host=true; NET.ev=[]; netPanelUpd('🌐 Apro la stanza…');
@@ -7641,7 +7650,7 @@ function netHostTick(raw){
 function netStatus(m){ NET.status=m===undefined?(NET.slot>=0?`✅ Collegato alla stanza ${NET.code} come Giocatore ${NET.slot+1}. Aspetta che l'host scelga modalità e mappa e avvii la partita.`:''):m; const e=document.getElementById('netst'); if(e) e.innerHTML=NET.status; }
 function netLobbyHTML(){
   const on=NET.conn&&NET.conn.open;
-  menuEl.innerHTML=`<h1>BILOCALE DEATHMATCH</h1><h2>🌐 Unisciti a una stanza <span style="opacity:.5;font-size:.6em">rete v4</span></h2>
+  menuEl.innerHTML=`<h1>BILOCALE DEATHMATCH</h1><h2>🌐 Unisciti a una stanza <span style="opacity:.5;font-size:.6em">rete v5</span></h2>
     ${NET.resHTML||''}
     ${on?'':`<div class="row"><input class="netcode" id="netCode" maxlength="4" placeholder="CODE" autocomplete="off" autocapitalize="characters" value="${NET.code||''}"><button class="btn" id="netGo">Collegati</button></div>
     <p class="sub">Il codice lo trovi sullo schermo di chi ha premuto <b>🏠 Crea stanza</b>.</p>`}
