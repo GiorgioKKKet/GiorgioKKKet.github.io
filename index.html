@@ -7557,7 +7557,7 @@ let ICE_SRC='pubblici';
 async function loadIce(){ if(!TURN_URL||loadIce.ok) return;
   try{ const ac=new AbortController(), t=setTimeout(()=>ac.abort(),6000);
     const r=await fetch(TURN_URL,{signal:ac.signal}); clearTimeout(t); if(!r.ok) throw new Error('http '+r.status);
-    const j=await r.json(); let s=j.iceServers; if(s&&!Array.isArray(s)) s=[s];
+    const j=await r.json(); let s=Array.isArray(j)?j:j.iceServers; if(s&&!Array.isArray(s)) s=[s];
     if(s&&s.length){ PEER_OPTS.config.iceServers=[...s,...TURN_EXTRA]; ICE_SRC='Cloudflare'; loadIce.ok=true; }
   }catch(e){ ICE_SRC='pubblici (Cloudflare non raggiunto)'; } }
 function netErrText(e){ const t=(e&&e.type)||String(e);
