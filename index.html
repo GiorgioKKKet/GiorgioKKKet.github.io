@@ -7558,7 +7558,7 @@ BOSS_ORDER.splice(0,BOSS_ORDER.length,'orso','napoli','kong','cobra','sax','pesc
 // CALAMARO ALBANESE: dal file "Super Calamaro Albanese – Render 3D" (calamaro palestrato a blocchi, qeleshe, baffoni,
 // 8 bracci che strisciano, tentacolo sinistro col bicipite gonfio e tentacolo destro che sventola la bandiera albanese).
 // Coordinate del render originale (alto ~10), scalate di CAL_S; i tentacoli sono due InstancedMesh (2 draw call per ~170 blocchi).
-const CAL_S=.25, CAL_SUCK=0xf6d9cc;
+const CAL_S=.19, CAL_SUCK=0xf6d9cc;
 const calSkin=(c1,c2)=>{ const t=ctex(64,(g,s)=>{ g.fillStyle=c1; g.fillRect(0,0,s,s); for(let i=0;i<46;i++){ g.fillStyle=Math.random()<.7?c2:'rgba(255,220,200,.35)'; g.beginPath(); g.arc(Math.random()*s,Math.random()*s,1+Math.random()*3,0,7); g.fill(); } }); t.magFilter=THREE.NearestFilter; return new THREE.MeshStandardMaterial({map:t,roughness:.75}); };
 let CAL_M=null; const calMats=()=>CAL_M||(CAL_M={SK:calSkin('#d5564b','rgba(110,25,35,.55)'),SL:calSkin('#e58a74','rgba(150,50,45,.4)'),SF:calSkin('#c24a4a','rgba(90,20,40,.6)'),suc:cm(CAL_SUCK,.7)});
 const CAL_FLAG=ctexR(300,200,(g,w,h)=>{ g.fillStyle='#e41e20'; g.fillRect(0,0,w,h); g.fillStyle='#000'; g.strokeStyle='#000'; g.beginPath(); g.ellipse(150,105,20,36,0,0,7); g.fill();
@@ -7615,7 +7615,7 @@ function bCalamaro(){
     const tp=P.Rc.getPoint(1); flagG.position.set(tp.x,tp.y+2.9,tp.z);
     if(qLevel>0||((m.fT=(m.fT||0)+1)&1)){ const ps=fg.attributes.position, fb=P.fb; for(let i=0;i<ps.count;i++){ const u=(fb[i*3]+3.2)/6.4; ps.setZ(i,Math.sin(u*6-t*6+fb[i*3+1]*.5)*.55*u); } ps.needsUpdate=true; fg.computeVertexNormals(); } };
   P.custom({t:0},0,0,0);   // posa iniziale (anche per la miniatura)
-  return {g,P,h:3.3}; }
+  return {g,P,h:2.6}; }
 // tentacolo che esce da sottoterra: prima il cerchio rosso, poi spunta e colpisce
 const TENT_FILL_G=new THREE.CircleGeometry(1,24), TENT_DIRT_G=new THREE.CircleGeometry(.75,14);
 function tentacleMesh(){ const g=new THREE.Group(), CM=calMats(), mark=new THREE.Mesh(RING_G,new THREE.MeshBasicMaterial({color:0xff1744,transparent:true,opacity:.5,depthWrite:false,side:THREE.DoubleSide,toneMapped:false}));
@@ -7682,7 +7682,7 @@ function cerberoLunge(m,q){ const a=bossAim(m,q); m.ry=a; const id=m.nid||(m.nid
     for(const p of players){ if(!p.active||p.dead||hit.has(p)) continue; const rx=p.x-m.x, rz=p.z-m.z, al=rx*dx+rz*dz, pe=Math.abs(rx*dz-rz*dx); if(al>0&&al<L&&pe<.55+p.hitR*.5){ hit.add(p); bossHurt(p,30,m,2); } }
     for(const o of bossTowerObjs()){ if(hit.has(o)) continue; const rx=o.x-m.x, rz=o.z-m.z, al=rx*dx+rz*dz, pe=Math.abs(rx*dz-rz*dx); if(al>0&&al<L&&pe<.55+(o.hitR||.4)){ hit.add(o); bossHurt(o,30,m,0); } } }}); }
 Object.assign(BOSSES,{
-  calamaro:{name:'CALAMARO ALBANESE',min:5,hp:1250,spd:1.9,r:.9,keep:4,mk:bCalamaro,think(m,q,d){
+  calamaro:{name:'CALAMARO ALBANESE',min:5,hp:1250,spd:1.9,r:.75,keep:4,mk:bCalamaro,think(m,q,d){
     if(m.cdB<=0&&d<12){ m.cdB=8*m.ck; calPump(m,1); calCage(m,q); popText(m.x,4.2,m.z,'GABBIA DI TENTACOLI!','#ff80ab',.8); SFX.play('roar'); }
     else if(m.cdA<=0&&d<14){ m.cdA=2.8*m.ck; const n=m.w>=15?6:m.w>=10?5:4; calPump(m,.7); calTentacles(m,q,n); popText(m.x,4.2,m.z,'TENTACOLI!','#ff80ab',.7); }
     else if(m.cdC<=0&&d<4.5){ m.cdC=2.2*m.ck; bossAct(m,.5,[[.25,m=>{ const a=bossAim(m,q); for(let k=-2;k<=2;k++) bossShot(m,'ink',m.x,m.z,a+k*.18); SFX.play('splat'); }]]); } }},
