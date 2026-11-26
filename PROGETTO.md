@@ -76,7 +76,7 @@ Il JavaScript è diviso in sezioni con intestazioni `// ===== NOME =====`, nell�
 | 📱 MOBILE · SOPRAVVIVENZA | Da solo, sul telefono, contro le ondate di alieni. Joystick sinistro per muoverti, joystick destro per mirare e sparare (trascina e tieni premuto); un tocco veloce a destra spara col mirino automatico. 4 vite. Si gioca in orizzontale. |
 | 🍺 DIFENDI LA BIRRA | Da 1 a 4 giocatori insieme (fino a 8 nelle mappe giganti) difendono la bottiglia di birra al centro della mappa per 10 ondate, con un BOSS ogni 5. Si parte senza difese: ogni nemico ucciso dà monete 💰 da spendere al SEXY SHOP 💗 (alleati, Lino Sassanelli che riempie la birra, potenziamenti fino a 5 livelli, torrette, muretti, vulcani). Più giocatori, più nemici. 4 vite a testa: se la bottiglia si rompe, è un allagamento. |
 | 📱 MOBILE · DIFENDI LA BIRRA | Da solo, sul telefono: difendi la bottiglia di birra per 10 ondate, coi boss e il Sexy Shop. Joystick sinistro per muoverti, destro per mirare e sparare; un tocco veloce a destra spara col mirino automatico. Fermati sulle piattaforme per torrette e alleati. 4 vite. |
-| 🏀 BASKET | 1 contro 1, 2 contro 2 o 3 contro 3: BALLERS contro HOOPERS. Prendi la palla passandoci sopra; con la palla puoi solo passare o tirare (tieni premuto lo sparo e rilascia nella zona verde della barra). 2 punti da dentro l'arco, 3 da fuori. Nessuno muore e nessuno viene stordito: il primo colpo rallenta, il secondo fa perdere palla. Il campo è più grande con più giocatori. Si vince a 21 punti o in vantaggio dopo 3 minuti. |
+| 🏀 BASKET | 1 contro 1, 2 contro 2 o 3 contro 3: BALLERS contro HOOPERS. Prendi la palla passandoci sopra; con la palla puoi solo passare o tirare (tieni premuto lo sparo e rilascia nella zona verde della barra). 2 punti da dentro l'arco, 3 da fuori. Dopo ogni canestro le due squadre ripartono dal proprio canestro e la palla va a chi ha subito. Nessuno muore e nessuno viene stordito: il primo colpo rallenta, il secondo fa perdere palla. Il campo è più grande con più giocatori. Si vince a 21 punti o in vantaggio dopo 3 minuti. |
 
 ## Comandi
 
@@ -106,7 +106,7 @@ Ogni giocatore ha il suo colore: **P1 rosso, P2 blu, P3 verde, P4 giallo, P5 vio
 | **Uaims** | 220 | 0.9 | Piedone dal cielo (Media · fino a 83 ad area) | Pioggia di piedi: 6 piedoni in punti casuali della mappa. |
 | **Viki** | 90 | 1.28 | Nasone gigante (Corta · 50) | ZA WARDO: ferma il tempo per 3 s (si muove solo lei). |
 | **IL** | 80 | 1.35 | Birra gigante (Media · 32) | Cannone di birra per 3,2 s. |
-| **Azzone** | 200 | 0.77 | Angurie a pallettoni: 3 angurie a ventaglio (30°), medio raggio (Media · 20 ×3 a ventaglio (30°)) | Saltone in avanti: atterra con danno ad area (55, raggio 3, spinta e stordimento), come King Kong. |
+| **Azzone** | 200 | 0.77 | Angurie a pallettoni: 6 angurie ravvicinate a ventaglio (30°), medio raggio (Media · 20 ×6 a ventaglio (30°)) | Saltone in avanti: atterra con danno ad area (55, raggio 3, spinta e stordimento), come King Kong. |
 | **Marcow** | 100 | 1.2 | Zucchine esplosive (Lunga · fino a 38 ad area) | Cavalca Travis (gattone grigio scuro) per 10 s: travolge chi gli sta intorno. |
 | **Pio el Fuego Ardente** | 140 | 0.85 | Tridente di Poseidone: lo lancia e fa un'onda (Media · 34 perforante + onda 15) | Bolla protettiva: invincibile per 3 s. |
 | **Mastino Lavico** | 300 | 0.7 | Sputafuoco lavico (bruciatura) (Corta · 3 + bruciatura 20) | Sei mastini kamikaze. |
@@ -118,7 +118,7 @@ Ogni giocatore ha il suo colore: **P1 rosso, P2 blu, P3 verde, P4 giallo, P5 vio
 | **Michele 7 di denari** | 190 | 0.82 | Anguria gigante tirata come una palla da bowling: travolge tutto (Media · 45 perforante, travolge e spinge) | Anguria gigante: più veloce del 50% e con il 30% di danno in più dell’attacco normale (59), rimbalza sui muri per 3 s. |
 | **Piero** | 100 | 1.15 | Scarpe e solette: per ricaricare devi andare a riprenderle (Media · 36 · 3 scarpe (rosa, gialla, arcobaleno) da riprendere; senza: calzini) | Apre un Foot Locker che risucchia i nemici vicini. |
 | **Il Bello** | 160 | 1.05 | Cerchio di bellezza tutto intorno, con posa sexy. Se vince balla la bachata (Corta · 24 tutto intorno) | Raffica di bellezza per 4 s: pugni velocissimi e +50% di vita, che svanisce a fine speciale. |
-| **L'Atleta** | 105 | 1.2 | Pallonata: tiro dritto e potente (Media · 30 tiro dritto) | Selfie: il flash stordisce (1,6 s) tutti i nemici intorno. Si ricarica in fretta. |
+| **L'Atleta** | 105 | 1.2 | Pallonata: tiro dritto e potente, più veloce di prima (Media · 30 tiro dritto) | Selfie: il flash stordisce (1,6 s) tutti i nemici intorno, in un raggio più largo (4,5). Si ricarica in fretta. |
 | **Il Cuoco Fan di Hockey** | 110 | 1.1 | Tartarughe velocissime che rimbalzano sui muri (Media · 10, rimbalza 3 volte) | Motosega per 6 s. |
 | **Il Divino e il Velociraptor** | 160 | 1.4 | Il raptor morde e graffia; a 60 hp muore e il Divino alza lo scudo dorato che respinge i colpi (Corta · 30 a morso (scudo dorato sotto i 60 hp)) | Ottiene una vita in più. |
 
@@ -239,7 +239,8 @@ Ogni giocatore la può usare una volta ogni 3 ondate. Dopo il risultato il gioco
 
 ## Rete
 
-- L’host apre una stanza con un codice di 4 lettere. Il codice passa una sola volta dal server pubblico di PeerJS, poi i dati vanno diretti via WebRTC.
+- L’host apre una stanza con un codice di 4 lettere. Col tasto 🚪 **Chiudi la stanza** (nel menu o nella pausa) la chiude: chi era collegato viene avvisato. Il guest esce col tasto 🚪 **Esci dalla stanza** (nella sala d'attesa o in alto a sinistra durante la partita) e torna al menu principale.
+- Il codice passa una sola volta dal server pubblico di PeerJS, poi i dati vanno diretti via WebRTC.
 - L’host fa girare tutta la partita e manda 20 istantanee al secondo (posizioni, eventi, HUD). I client mandano solo i comandi, 30 volte al secondo. Fino a 7 telefoni collegati.
 - Server ICE: STUN di Cloudflare e Google; TURN pubblico di PeerJS. Un TURN personale (per esempio Metered, o il Worker Cloudflare in `cloudflare-worker/`) si inserisce dal menu 🔑 TURN e resta salvato solo nel browser (`localStorage`).
 
@@ -254,6 +255,12 @@ Ogni giocatore la può usare una volta ogni 3 ondate. Dopo il risultato il gioco
 Controllati il codice e tutta la storia git: **non ci sono chiavi API né password private**. Ci sono solo le credenziali **pubbliche** del server TURN demo di PeerJS (`peerjs` / `peerjsp`), pubblicate da PeerJS stesso. Le chiavi Cloudflare del Worker stanno nelle variabili del pannello di Cloudflare, e l’indirizzo TURN personale resta nel browser di chi lo inserisce.
 
 ## Novità di questa versione
+
+### Ultime modifiche
+- **Basket:** dopo ogni canestro tutte e due le squadre ripartono dal proprio canestro; la palla va alla squadra che ha subito.
+- **Azzone:** 6 pallettoni invece di 3, più ravvicinati, sempre nel cono di 30°.
+- **L’Atleta:** attacca più in fretta (ricarica da 0,8 a 0,55 s) e il selfie ha un raggio più largo (da 3,2 a 4,5).
+- **Rete:** tasto per chiudere la stanza (host) o uscirne (guest) e tornare al menu principale.
 
 ### Personaggi
 - **Squalo delle Lamie:** l’attacco va dritto dove miri (non insegue più) e non fa più sanguinamento, nemmeno con la speciale.

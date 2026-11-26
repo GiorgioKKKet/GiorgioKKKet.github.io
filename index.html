@@ -117,6 +117,8 @@
   .netcode{font:700 28px ui-monospace,monospace;letter-spacing:8px;text-transform:uppercase;width:5.2em;text-align:center;padding:8px;border-radius:8px;border:3px solid #5c6bc0;background:#1c2438;color:#ffd54f}
   .chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:900px} .chip{font:inherit;font-size:12px;color:#fff;background:#2b3556;border:2px solid #5c6bc0;border-radius:16px;padding:6px 10px;cursor:pointer}
   .chip.on{background:#3949ab;border-color:#ffd54f} .netst{font-size:14px;text-align:center;max-width:640px}
+  #pause #pNet{display:none} body.nethost #pause #pNet{display:inline-block}
+  #netExit{display:none;position:fixed;z-index:6;left:calc(8px + env(safe-area-inset-left,0px));top:calc(70px + env(safe-area-inset-top,0px));font-size:13px;padding:6px 10px} body.netc #netExit{display:block} body.mobile.netc #netExit{top:calc(4px + env(safe-area-inset-top,0px));padding:4px 8px;font-size:12px}
   body.netc #hud .p.off{display:none} body.netc #help{display:none}
   @media (orientation:portrait){ body.mobile #rotate{display:flex} }
   /* telefono: interfaccia ridotta al minimo, cosi' si vede la partita */
@@ -149,10 +151,10 @@
 <div id="msg"></div>
 <div id="banner"></div>
 <div id="feed"></div>
-<div id="pause"><b>PAUSA</b><span class="pk">Esc, P o Start per riprendere · R per tornare al menu</span><div class="pbtn"><button class="btn" id="pResume">▶ Riprendi</button><button class="btn" id="pMenu">⌂ Menu</button></div></div>
+<div id="pause"><b>PAUSA</b><span class="pk">Esc, P o Start per riprendere · R per tornare al menu</span><div class="pbtn"><button class="btn" id="pResume">▶ Riprendi</button><button class="btn" id="pMenu">⌂ Menu</button><button class="btn" id="pNet">🚪 Chiudi la stanza</button></div></div>
 <div id="touch"><div class="stick" id="stL"><i></i><em>MUOVI</em></div><div class="stick" id="stR"><i></i><em>MIRA · SPARA</em></div><button id="tPause" aria-label="Pausa">❚❚</button><button id="tSp" aria-label="Mossa speciale">★</button><button id="tPass" aria-label="Passaggio">PASSA</button><button id="tOk" aria-label="Piazza">✔</button><button id="tNo" aria-label="Annulla">✖</button><div id="tHint">Tocco veloce a destra = mira automatica</div></div>
 <div id="rotate"><b>↻</b>Gira il telefono in orizzontale</div>
-<div id="netPanel"></div>
+<div id="netPanel"></div><button class="btn" id="netExit">🚪 Esci dalla stanza</button>
 <div id="menu"></div>
 <div id="help"><b>BILOCALE</b><span>Sparo: Q / Invio / U / Numpad0 · Pad: stick + A/RT · Esc: pausa · R: menu · G: grafica <span id="qlab">AUTO</span></span></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -360,6 +362,8 @@ const SFX=(()=>{
 addEventListener('pointerdown',()=>SFX.unlock()); addEventListener('keydown',()=>SFX.unlock());
 document.getElementById('pResume').onclick=()=>{ paused=false; pauseEl.style.display='none'; };
 document.getElementById('pMenu').onclick=()=>{ paused=false; pauseEl.style.display='none'; backToMenu(); };
+document.getElementById('pNet').onclick=()=>{ paused=false; pauseEl.style.display='none'; hostClose(); };
+document.getElementById('netExit').onclick=()=>clientExit();
 // suono di ogni arma allo sparo
 const WSND={beauty:'ssj',kickball:'kick',turtle:'slash',raptor:'slash',shark:'whoosh',burst:'pew',arrow:'whoosh',saetta:'zap',panz:'throw',tyre:'whoosh',bowl:'heavy',shoe:'throw',shofar:'shofar',pistol:'pew',drum:'pew2',zucchini:'pew2',mug:'throw',melon:'heavy',snake:'hiss',trident:'whoosh',punch:'punch',axe:'slash',nose:'slash',flame:'flame',lavaspit:'flame',
   cloud:'thunder',foot:'heavy',spray:'spray',postit:'throw',katana:'roar',table:'throw',chair:'throw',bazooka:'heavy',goku:'kame',toilet:'throw',clone:'pew2'};
@@ -3108,7 +3112,7 @@ const CHARS = [
  {n:'Uaims', d:'Capelli grigi, occhiali sole, costume azzurro, villoso', hp:220, spd:.9, h:1.7, w:1.9, skin:0xd7b98e, shirt:0xd7b98e, pants:0x00bcd4, hair:0x9e9e9e, shoe:0xd7b98e, f:['fat','hairy','shorts','sunglasses','beard','barefoot'], def:'foot', wl:'Piedone dal cielo'},
  {n:'Viki', d:'Donna, capelli lunghi, occhiali, camicia a quadri', hp:90, spd:1.28, dm:1.25, h:1, w:1, skin:0xf0c9a0, shirt:0x800080, pants:0xadd8e6, hair:0x3e2723, shoe:0xeeeeee, f:['female','longhair','glasses','plaid'], def:'nose', wl:'Nasone gigante'},
  {n:'IL', d:'Felpa verde, cappellino indietro, baffetti', hp:80, spd:1.35, dm:1.05, h:1.45, w:.6, skin:0xf0c9a0, shirt:0x4caf50, pants:0x222222, hair:0x3e2723, f:['cap','backwards','mustache','longsleeve','bag'], def:'mug', wl:'Birra gigante'},
- {n:'Azzone', d:'Trucco da Joker, felpa nera, sigaretta', hp:200, spd:.77, h:1.3, w:1.7, skin:0xf0c9a0, shirt:0x111111, pants:0x1f2937, hair:0x111111, f:['fat','jokermakeup','hoodie','cigarette'], def:'melon', wl:'Angurie a pallettoni: 3 angurie a ventaglio (30°), medio raggio'},
+ {n:'Azzone', d:'Trucco da Joker, felpa nera, sigaretta', hp:200, spd:.77, h:1.3, w:1.7, skin:0xf0c9a0, shirt:0x111111, pants:0x1f2937, hair:0x111111, f:['fat','jokermakeup','hoodie','cigarette'], def:'melon', wl:'Angurie a pallettoni: 6 angurie ravvicinate a ventaglio (30°), medio raggio'},
  {n:'Marcow', d:'Cappellino nero, occhiali, felpa grigia, cuffiette', hp:100, spd:1.2, h:1.05, w:1, skin:0xf0c9a0, shirt:0x4b5563, pants:0x111111, hair:0x2b1d14, f:['cap','glasses','cigarette','earphones','longsleeve','backpack'], def:'zucchini', wl:'Zucchine esplosive'},
  {n:'Pio el Fuego Ardente', d:'Capelli ricci, barba, t-shirt nera, fuori forma', hp:140, spd:.85, h:.7, w:1.5, skin:0xf0c9a0, shirt:0x1f2937, pants:0x111111, hair:0x2b1d14, f:['curly','beard','belly'], def:'trident', wl:'Tridente di Poseidone: lo lancia e fa un\'onda'},
  {n:'Mastino Lavico', d:'Creatura di magma gigante', hp:300, spd:.7, h:1.4, w:2.0, skin:0x333333, shirt:0xff3300, pants:0x222222, f:['monster','lava'], def:'lavaspit', wl:'Sputafuoco lavico (bruciatura)'},
@@ -3127,7 +3131,7 @@ const CHARS = [
  {n:'Il Divino e il Velociraptor', d:'Aureola e tunica rossa, a cavallo di un velociraptor blu', hp:160, spd:1.4, h:1.05, w:1.6, def:'raptor', wl:'Il raptor morde e graffia; a 60 hp muore e il Divino alza lo scudo dorato che respinge i colpi'},
 ];
 const NOGUN=new Set(['beauty','kickball','turtle','raptor','shield','shark','katana','trident','punch','shofar','arrow','saetta','panz','tyre','bowl','shoe']);   // armi gia' disegnate nel modello
-const W2={beauty:[.95,'Cerchio di bellezza'],kickball:[.8,'Pallonata'],turtle:[.32,'Tartarughe'],raptor:[.55,'Morsi e graffi'],shield:[.1,'Scudo divino'],shark:[1.15,'Squalo di terra'],burst:[1.0,'Pistola a raffica'],arrow:[.5,'Arco fiammante'],saetta:[.55,'Saette'],panz:[.8,'Panzerotti'],tyre:[.3,'Copertone'],bowl:[1.4,'Anguria da bowling'],shoe:[.42,'Scarpe e solette'],shofar:[.62,'Shofar'],lavaspit:[.18,'Sputafuoco lavico'],melon:[1.1,'Angurie a pallettoni'],mug:[.8,'Birra gigante'],zucchini:[.55,'Zucchine'],foot:[2.2,'Piedone'],axe:[.7,'Ascia'],trident:[.8,'Tridente di Poseidone'],drum:[.45,'Cosce di pollo'],clone:[.9,'Clone'],flame:[.12,'Pelata infuocata'],snake:[.9,'Serpenti'],cloud:[3,'Nuvola'],nose:[.8,'Nasone'],punch:[.75,'Pugno sdoppiante']};
+const W2={beauty:[.95,'Cerchio di bellezza'],kickball:[.55,'Pallonata'],turtle:[.32,'Tartarughe'],raptor:[.55,'Morsi e graffi'],shield:[.1,'Scudo divino'],shark:[1.15,'Squalo di terra'],burst:[1.0,'Pistola a raffica'],arrow:[.5,'Arco fiammante'],saetta:[.55,'Saette'],panz:[.8,'Panzerotti'],tyre:[.3,'Copertone'],bowl:[1.4,'Anguria da bowling'],shoe:[.42,'Scarpe e solette'],shofar:[.62,'Shofar'],lavaspit:[.18,'Sputafuoco lavico'],melon:[1.1,'Angurie a pallettoni'],mug:[.8,'Birra gigante'],zucchini:[.55,'Zucchine'],foot:[2.2,'Piedone'],axe:[.7,'Ascia'],trident:[.8,'Tridente di Poseidone'],drum:[.45,'Cosce di pollo'],clone:[.9,'Clone'],flame:[.12,'Pelata infuocata'],snake:[.9,'Serpenti'],cloud:[3,'Nuvola'],nose:[.8,'Nasone'],punch:[.75,'Pugno sdoppiante']};
 // statistiche mostrate nel menu: danno per colpo (gia' con i bonus del personaggio) e portata
 const R0=Math.round;
 const WINFO={
@@ -3135,7 +3139,7 @@ const WINFO={
   flame:{r:'Corta',d:m=>`${R0(7*m)} a fiammata (~${R0(7*m/.12)}/s) + bruciatura`}, punch:{r:'Media',d:m=>`${R0(22*m)} a pugno, si sdoppia in 2 e rimbalza sui muri`},
   drum:{r:'Corta',d:m=>`${R0(23*m)} + scia d'olio che fa scivolare`}, snake:{r:'Lunga',d:m=>`${R0(33*m)} perforante`}, pistol:{r:'Lunga',d:m=>`${R0(20*m)}`},
   shofar:{r:'Corta',d:m=>`${R0(27*m)} a cono largo`}, foot:{r:'Media',d:m=>`fino a ${R0(83*m)} ad area`}, nose:{r:'Corta',d:m=>`${R0(40*m)}`}, mug:{r:'Media',d:m=>`${R0(30*m)}`},
-  melon:{r:'Media',d:m=>`${R0(20*m)} ×3 a ventaglio (30°)`}, zucchini:{r:'Lunga',d:m=>`fino a ${R0(38*m)} ad area`},
+  melon:{r:'Media',d:m=>`${R0(20*m)} ×6 a ventaglio (30°)`}, zucchini:{r:'Lunga',d:m=>`fino a ${R0(38*m)} ad area`},
   trident:{r:'Media',d:m=>`${R0(34*m)} perforante + onda ${R0(15*m)}`},
   beauty:{r:'Corta',d:m=>`${R0(24*m)} tutto intorno`}, kickball:{r:'Media',d:m=>`${R0(30*m)} tiro dritto`}, turtle:{r:'Media',d:m=>`${R0(10*m)}, rimbalza 3 volte`},
   raptor:{r:'Corta',d:m=>`${R0(30*m)} a morso (scudo dorato sotto i 60 hp)`}, shield:{r:'Corta',d:()=>'respinge i colpi'}, shark:{r:'Lunga',d:m=>`${R0(45*m)} dove salta fuori, mira manuale`},
@@ -5047,7 +5051,7 @@ function updateShofar(dt){
 }
 const mkAct=k=>(p,x,z,a)=>spawn(k,x,z,a,p);
 const ACT={pistol:mkAct('bullet'),katana:mkAct('dragon'),table:mkAct('table'),chair:mkAct('chair'),bazooka:mkAct('rocket'),goku:mkAct('wave'),toilet:mkAct('toilet'),
-  melon:(p,x,z,a)=>{ for(const da of [-.26,0,.26]) spawn('melonsg',x,z,a+da,p); },mug:mkAct('mug'),zucchini:mkAct('zucchini'),drum:mkAct('drum'),clone:mkAct('clone'),snake:mkAct('snake'),cloud:(p,x,z,a)=>{spawn('cloud',x,z,a,p);sharkBite(p);},
+  melon:(p,x,z,a)=>{ for(let k=0;k<6;k++) spawn('melonsg',x,z,a+(k/5-.5)*.52,p); },mug:mkAct('mug'),zucchini:mkAct('zucchini'),drum:mkAct('drum'),clone:mkAct('clone'),snake:mkAct('snake'),cloud:(p,x,z,a)=>{spawn('cloud',x,z,a,p);sharkBite(p);},
   lavaspit:(p,x,z,a)=>spawn('lavaspit',x,z,a+(Math.random()-.5)*.3,p),
   flame:(p,x,z,a)=>spawn('flame',x,z,a+(Math.random()-.5)*.35,p),
   trident:mkAct('tridentp'),
@@ -5506,7 +5510,7 @@ const SPECIALS={
   'Il Bello':{need:200,dur:4,start(p){ p.spW='bellop'; p.spSpd=1.75; p.spBonus=Math.round(p.maxHp*.5); p.maxHp+=p.spBonus; p.hp+=p.spBonus; hud(); SFX.play('whoosh'); popText(p.x,2.6,p.z,'RAFFICA DI BELLEZZA! +50% VITA','#ff80ab',.8); },
     end(p){ p.spW=null; p.spSpd=1; if(p.spBonus){ p.maxHp=p.rageTimer>0?Math.round(p.baseHp*GIANT.hpMul):p.baseHp; p.hp=Math.min(p.hp,p.maxHp); p.spBonus=0; hud(); } } },   // la vita in piu' svanisce a fine speciale
   "L'Atleta":{need:110,dur:.9,start(p){ p.spRoot=1; p.spNoFire=1; popText(p.x,2.7,p.z,'📸 SELFIE!','#ffffff',.9);   // si fa un selfie: il flash stordisce chi e' intorno (si ricarica in fretta)
-      setTimeout(()=>{ if(p.dead) return; spArea(p,p.x,p.z,3.2,10,{stun:1.6}); ringAdd(p.x,p.z,3.2,0xffffff,.9); fxAdd(p.x,p.z,3.2,0xffffff,1.6,.25); SPK.burst(p.x,1.6,p.z,26,0xffffff,6,4); SFX.play('zap'); },380); },
+      setTimeout(()=>{ if(p.dead) return; spArea(p,p.x,p.z,4.5,10,{stun:1.6}); ringAdd(p.x,p.z,4.5,0xffffff,.9); fxAdd(p.x,p.z,4.5,0xffffff,1.6,.25); SPK.burst(p.x,1.6,p.z,26,0xffffff,6,4); SFX.play('zap'); },380); },
     end(p){ p.spRoot=0; p.spNoFire=0; },
     vis(p,on){ if(on){ const g=new THREE.Group(); bx(g,0x111111,.16,.3,.03,0,0,0,.3); const sc=bx(g,0x80d8ff,.13,.25,.01,0,0,-.02,.1); sc.material=new THREE.MeshBasicMaterial({color:0x80d8ff,toneMapped:false});
         const fl=new THREE.Mesh(sphM,new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,toneMapped:false,depthWrite:false})); fl.position.z=-.05; g.add(fl); g.userData.fl=fl; g.position.set(.25,1.75,.55); g.rotation.y=Math.PI; p.mesh.add(g); p.spX=g; } },
@@ -5928,9 +5932,12 @@ function bkStop(){ if(BK.ball){ scene.remove(BK.ball.mesh); BK.ball=null; } BK.h
 // palla a due a centrocampo
 function bkTip(){ const [cx,cz]=BK_GEOM.C, B=BK.ball; B.holder=null; B.st='free'; B.x=cx; B.z=cz; B.y=2.6; B.vx=B.vz=0; B.vy=3;
   for(const t of [0,1]){ const ps=players.filter(p=>p.active&&p.team===t); ps.forEach((p,k)=>{ p.x=cx+(t?1:-1)*(1.3+k*.9); p.z=cz+(k%2?1:-1)*k*1.3; p.angle=t?-Math.PI/2:Math.PI/2; p.stunT=0; p.px=p.x; p.pz=p.z; }); } }
-// rimessa: la palla va alla squadra che ha subito canestro, sotto il proprio canestro
-function bkInbound(team){ const ps=players.filter(p=>p.active&&p.team===team); if(!ps.length){ bkTip(); return; } const [hx,hz]=BK_GEOM.H[team];
-  const p=ps.reduce((a,b)=>Math.hypot(b.x-hx,b.z-hz)<Math.hypot(a.x-hx,a.z-hz)?b:a); p.x=hx+(team?-1.6:1.6); p.z=hz+1; spFree(p); bkGive(p); }
+// rimessa: dopo il canestro tutte e due le squadre ripartono dal proprio canestro; la palla va a chi ha subito canestro
+const BK_RSP=[[1.6,1],[2.8,-1.6],[3.2,2.2]];   // posti davanti al proprio canestro (verso il centro): il primo e' di chi rimette
+function bkInbound(team){ const ps=players.filter(p=>p.active&&p.team===team); if(!ps.length){ bkTip(); return; }
+  for(const t of [0,1]){ const [hx,hz]=BK_GEOM.H[t], s=t?-1:1; players.filter(p=>p.active&&p.team===t).forEach((p,k)=>{ const [ox,oz]=BK_RSP[k%BK_RSP.length];
+    p.x=hx+s*ox*BKS; p.z=hz+oz*BKS; p.px=p.x; p.pz=p.z; p.vx=p.vz=0; p.angle=s>0?Math.PI/2:-Math.PI/2; p.bkCh=0; p.bkCharging=false; spFree(p); }); }
+  bkGive(ps[0]); }
 function bkGive(p){ const B=BK.ball; B.holder=p; B.st='held'; B.vx=B.vz=B.vy=0; p.bkCh=0; p.bkCharging=false; }
 function bkDrop(p,by){ const B=BK.ball; if(B.holder!==p) return; B.holder=null; B.st='free'; B.x=p.x; B.z=p.z; B.y=.9; const a=Math.random()*6.283; B.vx=Math.cos(a)*3; B.vz=Math.sin(a)*3; B.vy=2.5; p.bkCh=0; p.bkCharging=false; p.bkNoGrab=.9;
   if(by&&by.st){ by.st.stl++; by.spF=Math.min(1,by.spF+.3); popText(p.x,2.3,p.z,'RUBATA!','#ffd54f',.8); feed(`🏀 ${pname(by)} ruba palla a ${pname(p)}`); } }
@@ -6676,10 +6683,11 @@ function showMenu(){
   } else if(!menu.mode){
     menuEl.innerHTML=`<h1>BILOCALE DEATHMATCH</h1>${lastResult?resultsHTML(lastResult):''}${NET_ROLE==='host'?netHostHint():''}<h2>Scegli la modalità</h2><div class="row">
       ${Object.entries(MODES).filter(([k])=>!(NET_ROLE==='host'&&isMobileMode(k))).sort((a,b)=>IS_TOUCH?isMobileMode(b[0])-isMobileMode(a[0]):0).map(([k,m])=>`<button class="card mode" data-mode="${k}"><b>${m.name}</b><span>${m.desc()}</span></button>`).join('')}</div>
-      <div class="row">${IS_TOUCH?`<button class="btn" id="fsb" style="border-color:#ffd54f">${fsOn()?'⛶ Esci da schermo intero':'⛶ Schermo intero'}</button>`:''}${NET_ROLE==='client'&&!NET.client?'<button class="btn" id="neth" style="border-color:#ffd54f">🏠 Crea stanza</button><button class="btn" id="netb">🌐 Unisciti a una stanza</button><button class="btn" id="nett">🔑 TURN: '+(turnUrl()?'attivo':'non impostato')+'</button>':''}<button class="btn" id="opt">⚙️ Impostazioni</button>${IS_TOUCH?'':`<button class="btn" id="fsb">${fsOn()?'⛶ Esci da schermo intero':'⛶ Schermo intero'}</button>`}<button class="btn" id="lb">🏆 Classifica</button><button class="btn" id="ctl">🎮 Comandi</button></div>${keysP}`;
+      <div class="row">${IS_TOUCH?`<button class="btn" id="fsb" style="border-color:#ffd54f">${fsOn()?'⛶ Esci da schermo intero':'⛶ Schermo intero'}</button>`:''}${NET_ROLE==='client'&&!NET.client?'<button class="btn" id="neth" style="border-color:#ffd54f">🏠 Crea stanza</button><button class="btn" id="netb">🌐 Unisciti a una stanza</button><button class="btn" id="nett">🔑 TURN: '+(turnUrl()?'attivo':'non impostato')+'</button>':''}${NET_ROLE==='host'?'<button class="btn" id="netx" style="border-color:#ff8a80">🚪 Chiudi la stanza</button>':''}<button class="btn" id="opt">⚙️ Impostazioni</button>${IS_TOUCH?'':`<button class="btn" id="fsb">${fsOn()?'⛶ Esci da schermo intero':'⛶ Schermo intero'}</button>`}<button class="btn" id="lb">🏆 Classifica</button><button class="btn" id="ctl">🎮 Comandi</button></div>${keysP}`;
     document.getElementById('ctl').onclick=()=>{menu.sub='ctrl';showMenu();};
     const nb=document.getElementById('netb'); if(nb) nb.onclick=()=>{menu.sub='net';showMenu();};
     const nh=document.getElementById('neth'); if(nh) nh.onclick=()=>{ NET_ROLE='host'; hostOpen(); showMenu(); };
+    const nx=document.getElementById('netx'); if(nx) nx.onclick=()=>hostClose();
     const nt=document.getElementById('nett'); if(nt) nt.onclick=()=>{ turnSet(); showMenu(); };
     document.getElementById('fsb').onclick=()=>goFullscreen(false);
     menuEl.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{menu.mode=b.dataset.mode;showMenu();});
@@ -7859,16 +7867,24 @@ function netPanelHTML(msg){
   return msg?msg:`🌐 STANZA <b>${NET.code}</b><br>${list||'Nessuno collegato'}${NET.tryN?`<br>📶 ${NET.tryN} in collegamento…`:''}${started?'':'<br><span style="opacity:.75">Fino a 7 collegati · rete v5 · TURN '+ICE_SRC+'</span>'}`;
 }
 async function hostOpen(){
-  NET.host=true; NET.ev=[]; netPanelUpd('🌐 Apro la stanza…');
+  NET.host=true; NET.ev=[]; document.body.classList.add('nethost'); netPanelUpd('🌐 Apro la stanza…');
   try{ await loadPeer(); }catch(e){ netPanelUpd('⚠️ Non riesco a caricare PeerJS: serve internet per aprire la stanza'); return; } await loadIce();
-  const tryOpen=()=>{ NET.code=newCode(); const pr=new Peer('bdm-lan-'+NET.code,PEER_OPTS); NET.peer=pr;
+  if(!NET.host) return;   // stanza chiusa mentre si caricava
+  const tryOpen=()=>{ if(!NET.host) return; NET.code=newCode(); const pr=new Peer('bdm-lan-'+NET.code,PEER_OPTS); NET.peer=pr;
     pr.on('open',()=>{ NET.panelMsg=''; netPanelUpd(); if(!started) showMenu(); });
     pr.on('error',e=>{ if(e.type==='unavailable-id'){ try{pr.destroy();}catch(_){} tryOpen(); } else if(e.type!=='peer-unavailable') netPanelUpd(netErrText(e)); });
-    pr.on('disconnected',()=>{ try{pr.reconnect();}catch(_){} });
+    pr.on('disconnected',()=>{ if(NET.host&&NET.peer===pr&&!pr.destroyed) try{pr.reconnect();}catch(_){} });
     pr.on('connection',hostConn); };
   tryOpen();
 }
-function hostConn(conn){
+// l'host chiude la stanza: avvisa i collegati, chiude tutto e torna al menu principale
+function hostClose(){ if(!NET.host) return; netSendAll({k:'bye'});
+  const conns=[...NET.conns.values()].map(c=>c.conn), pr=NET.peer;
+  setTimeout(()=>{ conns.forEach(c=>{ try{c.close();}catch(_){} }); try{pr&&pr.destroy();}catch(_){} },300);   // un attimo per far arrivare l'avviso
+  NET.host=false; NET.ev=null; NET.peer=null; NET.conns.clear(); NET.rin.fill(null); NET.code=''; NET.tryN=0; NET.panelMsg=''; NET_ROLE='client';
+  document.body.classList.remove('nethost'); netPanel.style.display='none'; netPanel.innerHTML=''; netPanel._h='';
+  if(started) backToMenu(); else { Object.assign(menu,{mode:null,map:null,sub:null}); showMenu(); } }
+function hostConn(conn){ if(!NET.host){ try{conn.close();}catch(_){} return; }
   NET.tryN=(NET.tryN||0)+1; netPanelUpd(); let tried=true;
   const untry=()=>{ if(tried){ tried=false; NET.tryN=Math.max(0,NET.tryN-1); netPanelUpd(); } };
   setTimeout(untry,30000); conn.on('close',untry); conn.on('error',untry);
@@ -7920,13 +7936,13 @@ function netLobbyHTML(){
     <p class="sub">Il codice lo trovi sullo schermo di chi ha premuto <b>🏠 Crea stanza</b>.</p>`}
     <p class="netst" id="netst">${NET.status||''}</p>
     <h2>Il tuo personaggio</h2><div class="chips">${CHARS.map((c,k)=>`<button class="chip ${NET.myChar===k?'on':''}" data-ch="${k}">${c.n}</button>`).join('')}<button class="chip ${NET.myChar<0?'on':''}" data-ch="-1">🎲 Casuale</button></div>
-    <div class="row"><button class="btn" id="back">${on?'Esci dalla stanza':'⟵ Indietro'}</button></div>`;
+    <div class="row"><button class="btn" id="back">${on?'🚪 Esci dalla stanza':'⟵ Indietro'}</button></div>`;
   menuEl.querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>{ NET.myChar=+b.dataset.ch; try{localStorage.setItem('bdm_netchar',NET.myChar);}catch(_){}
     if(NET.conn&&NET.conn.open) NET.conn.send({k:'char',ci:NET.myChar}); showMenu(); });
   const go=document.getElementById('netGo'), inp=document.getElementById('netCode');
   if(go){ go.onclick=()=>{ const c=(inp.value||'').toUpperCase().replace(/[^A-Z]/g,''); if(c.length!==4){netStatus('Il codice è di 4 lettere');return;} clientConnect(c); };
     inp.onkeydown=e=>{ e.stopPropagation(); if(e.key==='Enter') go.click(); }; inp.onkeyup=e=>e.stopPropagation(); }
-  document.getElementById('back').onclick=()=>{ if(NET.conn&&NET.conn.open){ clientQuit(); } else { menu.sub=null; } showMenu(); };
+  document.getElementById('back').onclick=()=>{ if(NET.conn&&NET.conn.open) clientExit(); else { menu.sub=null; showMenu(); } };
 }
 try{ const v=localStorage.getItem('bdm_netchar'); if(v!==null) NET.myChar=+v; }catch(_){}
 async function clientConnect(code){
@@ -7949,11 +7965,14 @@ async function clientConnect(code){
     conn.on('close',()=>clientLost()); conn.on('error',()=>clientLost()); });
 }
 function clientQuit(){ clearTimeout(NET.joinT); clearInterval(NET.iceT); try{NET.conn&&NET.conn.close();}catch(_){} try{NET.peer&&NET.peer.destroy();}catch(_){} NET.conn=null; NET.peer=null; NET.slot=-1; NET.client=false; if(NET.view) clientLeave(); netStatus(''); }
+// il guest esce dalla stanza (dalla sala d'attesa o durante la partita) e torna al menu principale
+function clientExit(){ clientQuit(); NET.resHTML=''; menu.sub=null; menuEl.style.display='flex'; showMenu(); }
 function clientLost(){ if(!NET.client) return; const v=NET.view; NET.client=false; NET.conn=null; NET.slot=-1; if(v) clientLeave(); netStatus('⚠️ Connessione con l\'host persa'); menu.sub='net'; showMenu(); }
 function clientData(d){
   if(d.k==='shop'){ SHOP.tab='bot'; shopShow(d.st); return; }
   if(d.k==='shopst'){ SHOP.st=d.st; const ov=document.getElementById('shopov'); if(ov) shopRender(ov,d.msg); return; }
   if(d.k==='shopx'){ const ov=document.getElementById('shopov'); if(ov) ov.remove(); return; }
+  if(d.k==='bye'){ clientQuit(); netStatus('🚪 L\'host ha chiuso la stanza'); menu.sub='net'; menuEl.style.display='flex'; showMenu(); return; }
   if(d.k==='hello'){ NET.slot=d.slot; netStatus(); }
   else if(d.k==='full'){ netStatus('⚠️ La stanza è piena (massimo 7 giocatori collegati)'); }
   else if(d.k==='res'){ NET.resHTML=d.html; if(!NET.view&&menu.sub==='net') showMenu(); }
