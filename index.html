@@ -5308,12 +5308,13 @@ function allyUpdate(dt){ const host=!NETON();
           if(a.bq>0){ a.bT-=dt; if(a.bT<=0){ a.bT=.09; a.bq--; const b=spawn(K.shot,a.x+Math.sin(a.ang)*.5,a.z+Math.cos(a.ang)*.5,a.ang+(K.burst?(Math.random()-.5)*.1:0),a.owner); b.special=true; b.dk=mk_; SFX.play(K.burst?'pew':'throw'); } }
           if(K.melee&&d<K.range+tR(foe)&&a.cd<=0){ a.cd=K.melee[1]; spHit(a.owner,foe,K.melee[0]*mk_,{push:.4}); fxAdd(foe.x,foe.z,.5,0xffffff,.7,.15); SFX.play('punch'); }
           if(K.breath&&d<K.range+tR(foe)&&a.cd<=0){ a.cd=K.breath[1]; for(const t of spTargets(a.owner)){ const dx=t.x-a.x, dz=t.z-a.z, dd=Math.hypot(dx,dz); if(dd>K.range+tR(t)) continue; let da=Math.atan2(dx,dz)-a.ang; da=Math.atan2(Math.sin(da),Math.cos(da)); if(Math.abs(da)<.7) spHit(a.owner,t,K.breath[0]*mk_,{burn:1.5}); }
-            for(let q=1;q<=3;q++) fxAdd(a.x+Math.sin(a.ang)*q,a.z+Math.cos(a.ang)*q,.5+q*.15,0xff6d00,1.2,.25); SFX.play('flame'); }
+            a.brT=.7; for(let q=1;q<=3;q++) fxAdd(a.x+Math.sin(a.ang)*q,a.z+Math.cos(a.ang)*q,.55+q*.15,0xb55cff,.9,.25); SFX.play('flame'); }   // fiato viola del drago
           if(a.kind==='cobra'&&d<K.range&&a.cd<=0){ a.cd=K.cd; for(let k=-2;k<=2;k++){ const b=spawn('venom',a.x,a.z,a.ang+k*.16,a.owner); b.special=true; } SFX.play('hiss'); } }
         else if(Math.hypot(a.owner.x-a.x,a.owner.z-a.z)>2.5){ const dx=a.owner.x-a.x, dz=a.owner.z-a.z, d=Math.hypot(dx,dz); mx=dx/d; mz=dz/d; a.ang=Math.atan2(dx,dz); }
         if(mx||mz){ const st=K.spd*dt; if(K.fly){ a.x=Math.max(.5,Math.min(W-.5,a.x+mx*st)); a.z=Math.max(.5,Math.min(H-.5,a.z+mz*st)); } else [a.x,a.z]=slideMove(a.x,a.z,mx*st,mz*st,K.r); a.mv=1; } else a.mv=0; }
     else { a.x+=(a.tx-a.x)*Math.min(1,dt*12); a.z+=(a.tz-a.z)*Math.min(1,dt*12); }
-    a.m.position.set(a.x,a.kind==='cobra'?.4+Math.sin(a.t*3)*.15:a.mv||a.kind==='dog'?Math.abs(Math.sin(a.t*(a.kind==='dog'?18:9)))*.08:0,a.z); a.m.rotation.y=a.ang;
+    if(a.kind==='dragon') dragonAnim(a,dt);
+    a.m.position.set(a.x,a.kind==='cobra'?.4+Math.sin(a.t*3)*.15:a.kind==='dragon'?0:a.mv||a.kind==='dog'?Math.abs(Math.sin(a.t*(a.kind==='dog'?18:9)))*.08:0,a.z); a.m.rotation.y=a.ang;
     if(a.kind==='cobra'&&a.m.userData.b){ const B=a.m.userData.b; if(B.userData&&B.userData.P&&B.userData.P.wings) B.userData.P.wings.forEach((w,k)=>w.rotation.z=(k?1:-1)*Math.sin(a.t*12)*.5); } } }
 // Lino va verso la birra barcollando e la riempie (5 vita al secondo) finche' dura
 function linoTick(a,dt,host){ const c=TD.core, B=a.m.userData.b;
@@ -5663,7 +5664,7 @@ const BOT_K={
   knight:{n:'Cavaliere',d:'Armatura pesante e spadone: tiene la linea.',cost:120,k:'knight',n_:1},
   mafia:{n:'Mafiosi italo-americani',d:'Due picciotti col mitra a tamburo. Raffiche corte.',cost:170,k:'mafia',n_:2},
   wizard:{n:'Mago sul cinghiale',d:'Corre in giro sul suo cinghiale e lancia sfere magiche che esplodono.',cost:210,k:'wizard',n_:1},
-  dragon:{n:'Drago medievale',d:'Vola sopra a tutto e brucia i nemici col fiato. Costa caro.',cost:360,k:'dragon',n_:1},
+  dragon:{n:'Drago medievale',d:'Cammina a terra e brucia i nemici col fiato viola. Robusto, ma i nemici lo possono colpire. Costa caro.',cost:360,k:'dragon',n_:1},
   lino:{n:'Lino Sassanelli',d:'Ubriaco fradicio: va alla birra e la riempie di 5 vita al secondo per 60 secondi. I nemici lo possono colpire!',cost:200,k:'lino',n_:1},
 };
 // prezzo dei bot: +50% se chi compra ha gia' in campo, vivo, un bot dello stesso tipo (si conta per ogni tipo di bot, non sul totale)
@@ -5684,7 +5685,7 @@ Object.assign(ALLY_K,{
   knight:{hp:230,spd:2.6,r:.38,life:1e9,range:1.2,melee:[24,.9],mk:()=>knightMesh()},
   mafia:{hp:95,spd:2.8,r:.32,life:1e9,range:6,cd:1.3,burst:6,shot:'tommy',mk:()=>mafiaMesh()},
   wizard:{hp:160,spd:4.2,r:.42,life:1e9,range:6.5,cd:1.3,shot:'magic',mk:()=>wizardMesh()},
-  dragon:{hp:330,spd:3.2,r:.6,life:1e9,range:3,fly:1,breath:[12,.3],mk:()=>dragonMesh2()},
+  dragon:{hp:330,spd:3.2,r:.5,life:1e9,range:3,breath:[12,.3],mk:()=>dragonMesh2()},   // a terra: aggira i muri e i nemici lo possono colpire
   lino:{hp:160,spd:1.7,r:.34,life:60,range:0,heal:5,mk:()=>linoMesh()},
 });
 // --- modelli ---
@@ -5709,8 +5710,57 @@ function linoMesh(){ const g=new THREE.Group(), SK=0xe8b08a, B=new THREE.Group()
   [-1,1].forEach(s=>bx(B,0x111111,.05,.03,.02,s*.07,1.08,.125,.5)); bx(B,0x6d4c41,.12,.03,.02,0,.95,.125,.6);
   const bt=new THREE.Group(); bt.position.set(.3,.62,.12); B.add(bt); cy(bt,0x2e7d32,.06,.06,.26,0,0,0,.2); cy(bt,0x2e7d32,.025,.05,.12,0,.18,0,.2); bx(bt,0xfafafa,.125,.08,.125,0,-.02,0,.6);
   shadowize(g); g.scale.setScalar(1.15); return g; }
-function dragonMesh2(){ const g=new THREE.Group(), R=0x2e7d32; const d=makeDragon(); d.scale.setScalar(1.7); d.position.y=.3; g.add(d);
-  ell(g,R,.5,.35,.9,0,1.3,0,.6); [-1,1].forEach(s=>{ const w=bx(g,0x1b5e20,1.2,.04,.7,s*.8,1.6,-.1,.6); w.rotation.z=s*.35; }); shadowize(g); return g; }
+// Drago medievale (dal "Bestiario medievale"): cammina a terra (non vola), coda appiattita da varano, collo lungo, ali piccole da pipistrello, fiato viola.
+// Costruito a misura del file originale (unita' grandi) e rimpicciolito con DRG_S. Prestazioni: le parti ferme si fondono per gruppo
+// (corpo, 2 zampe, 2 ali, testa, mascella = una draw call ciascuno), collo e coda sono un'unica InstancedMesh di 33 cubi (una draw call). Niente luci.
+const DRG_S=.12, DRG_NN=9, DRG_TN=24, DRG_C={sk:0x3e4d2e,bl:0xcdbd8a,horn:0xd7ccb0,claw:0x2b2620,band:0xa89a4a,bone:0x2e2a25,mem:0x6a3f80};
+const DRG_NB=[[0,5.7,2],[0,7.2,3],[0,8.8,3.1],[0,9.9,3.9]];
+const DRG_IM=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.8,metalness:.05});
+// membrana dell'ala: triangoli sulle due facce (cosi' si fonde col resto dell'ala, niente materiale a doppia faccia)
+const DRG_MEM=(()=>{ const V=(x,y,z)=>new THREE.Vector3(x,y,z), A=V(0,0,0),B=V(1.6,.9,-.4),C=V(2.8,2.6,-.2),F=[V(4.2,3.6,-1.2),V(4.4,2.2,-2.4),V(3.6,.6,-3.2)],H=V(.2,-1.2,-2.6);
+  const T=[C,F[0],F[1],C,F[1],F[2],C,F[2],B,B,F[2],H,B,H,A], pa=[]; T.forEach(v=>pa.push(v.x,v.y,v.z)); for(let i=T.length-3;i>=0;i-=3) [T[i],T[i+2],T[i+1]].forEach(v=>pa.push(v.x,v.y,v.z));
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(pa,3)); g.computeVertexNormals(); return {g,A,B,C,F,H}; })();
+function dragonMesh2(){ const g=new THREE.Group(), d=new THREE.Group(), C=DRG_C, b=(p,c,w,h,dd,x,y,z)=>bx(p,c,w,h,dd,x,y,z,.8);
+  d.scale.setScalar(DRG_S); d.position.z=3*DRG_S; g.add(d);
+  const tg=new THREE.Group(); tg.position.set(0,4.6,.2); tg.rotation.x=.2; d.add(tg);
+  b(tg,C.sk,2.6,2.6,4.4,0,0,0); b(tg,C.bl,2.2,.5,4,0,-1.35,.1); for(let i=0;i<6;i++) b(tg,C.horn,.35,.9,.5,0,1.5,-1.8+i*.75);
+  // zampe: coscia, ginocchio e piede formano un pezzo unico (si muove solo dall'anca)
+  const legs=[-1,1].map(s=>{ const hp=new THREE.Group(); hp.position.set(s*1.55,4.5,.2); hp.rotation.x=-.55; d.add(hp);
+    b(hp,C.sk,1.1,2.5,1.3,0,-1.2,0); b(hp,C.sk,1.4,1.4,1.5,0,-.6,-.1);
+    const kn=new THREE.Group(); kn.userData.rigid=1; kn.position.y=-2.4; kn.rotation.x=.85; hp.add(kn); b(kn,C.sk,.8,2.3,.9,0,-1.1,0);
+    const ft=new THREE.Group(); ft.userData.rigid=1; ft.position.y=-2.2; ft.rotation.x=-.3; kn.add(ft); b(ft,C.sk,1.1,.4,1.9,0,-.1,.7); for(const c of [-.38,0,.38]) b(ft,C.claw,.22,.22,.8,c,-.1,1.8);
+    return hp; });
+  const M=DRG_MEM, wings=[-1,1].map(s=>{ const w=new THREE.Group(); w.position.set(s*1.4,5.9,.8); if(s<0) w.scale.x=-1; w.userData.s=s; d.add(w);
+    const bone=(p,q,th)=>{ const dv=new THREE.Vector3().subVectors(q,p), m=b(w,C.bone,th,th,dv.length(),0,0,0); m.position.copy(p).add(q).multiplyScalar(.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),dv.normalize()); };
+    bone(M.A,M.B,.4); bone(M.B,M.C,.32); M.F.forEach(f=>bone(M.C,f,.18)); bone(M.F[2],M.H,.14);
+    w.add(new THREE.Mesh(M.g,cm(C.mem,.8))); b(w,C.claw,.2,.2,.7,M.C.x,M.C.y+.3,M.C.z+.4); return w; });
+  const head=new THREE.Group(); d.add(head);
+  b(head,C.sk,1.6,1.3,1.8,0,0,.2); b(head,C.sk,1,.8,2.4,0,-.1,2.1); b(head,C.bl,.8,.5,1.1,0,-.8,.2);
+  for(const s of [-1,1]){ b(head,0xf2c61f,.3,.3,.3,s*.85,.35,.5); b(head,0x111111,.1,.34,.1,s*.98,.35,.5); b(head,0x1a1a14,.25,.25,.3,s*.26,.46,3); b(head,C.horn,.2,.2,.2,s*.35,-.5,.9);
+    const h=b(head,C.horn,.35,.35,1.7,s*.6,.8,-.7); h.rotation.x=-.55; const h2=b(head,C.horn,.25,.25,1,s*.8,.5,-1.2); h2.rotation.set(-.3,0,s*.4); b(head,C.sk,.55,.25,.35,s*.6,.75,.45); }
+  for(let i=0;i<6;i++) b(head,C.horn,.2,.2,.2,i%2?.4:-.4,-.58,1.4+i*.35);
+  const jaw=new THREE.Group(); jaw.position.set(0,-.45,.2); head.add(jaw); b(jaw,C.sk,.9,.3,2.8,0,0,1.6); for(let i=0;i<5;i++) b(jaw,0xf0ead8,.15,.2,.15,i%2?.3:-.3,.2,1+i*.5);
+  // collo (9 cubi) + coda (24 cubi): una sola InstancedMesh, con le fasce chiare ogni tanto
+  const nt=dyn(new THREE.InstancedMesh(boxGeo,DRG_IM,DRG_NN+DRG_TN)), col=new THREE.Color(); nt.frustumCulled=false;
+  for(let i=0;i<DRG_NN;i++) nt.setColorAt(i,col.setHex(i%3===2?C.band:C.sk)); for(let i=0;i<DRG_TN;i++) nt.setColorAt(DRG_NN+i,col.setHex(i%4<1?C.band:C.sk)); d.add(nt);
+  g.userData.dr={d,tg,legs,wings,head,jaw,nt,nc:new THREE.CatmullRomCurve3(DRG_NB.map(v=>new THREE.Vector3(...v)))};
+  dragonPose(g.userData.dr,0,0,0); shadowize(g); return g; }
+const _dm=new THREE.Matrix4(), _dq=new THREE.Quaternion(), _dp=new THREE.Vector3(), _ds=new THREE.Vector3();
+// posa del drago: t = tempo, wk = quanto cammina (0-1), ff = quanto soffia (0-1)
+function dragonPose(U,t,wk,ff){
+  U.d.position.y=Math.sin(t*1.8)*.06*DRG_S+Math.abs(Math.sin(t*7))*.2*DRG_S*wk; U.d.rotation.z=Math.sin(t*7)*.04*wk; U.tg.rotation.x=.2-ff*.08;
+  U.legs.forEach((hp,k)=>{ hp.rotation.x=-.55+Math.sin(t*7+k*Math.PI)*.45*wk; });
+  U.nc.points.forEach((p,j)=>{ const v=DRG_NB[j]; p.set(v[0]+Math.sin(t*.8+j)*.2*j/3,v[1]+(j>1?ff*.5:0)+Math.sin(t*1.8+j)*.05,v[2]+(j>1?ff*.7:0)); });
+  for(let i=0;i<DRG_NN;i++){ const s=i/(DRG_NN-1), r=1.7-s*.65; U.nc.getPoint(s,_dp); U.nt.setMatrixAt(i,_dm.compose(_dp,_dq,_ds.set(r*.85,r,r*1.1))); }
+  U.nc.getPoint(1,_dp); U.head.position.copy(_dp); U.head.rotation.set(.32-ff*.55,Math.sin(t*.7)*.15,0); U.jaw.rotation.x=.06+ff*.5+Math.sin(t*2)*.01;
+  for(let i=0;i<DRG_TN;i++){ const s=(i+.5)/DRG_TN, w=1.3*(1-s*.85)+.15, h=1.9*(1-s*.78)+.25;
+    _dp.set(Math.sin(t*(1.3+wk)-s*3.5)*1.5*s,Math.max(h/2,.35+3.6*Math.pow(1-s,1.6)+Math.max(0,s-.7)*1.5),-1.8-s*13.5); U.nt.setMatrixAt(DRG_NN+i,_dm.compose(_dp,_dq,_ds.set(w,h,1.1))); }
+  U.nt.instanceMatrix.needsUpdate=true;
+  U.wings.forEach(w=>{ w.rotation.z=w.userData.s*(.1+Math.sin(t*2.2)*.1+ff*.3); });
+}
+function dragonAnim(a,dt){ const U=a.m.userData.dr; if(!U) return;
+  a.wk=(a.wk||0)+((a.mv?1:0)-(a.wk||0))*Math.min(1,dt*6); if(a.brT>0) a.brT-=dt;
+  a.ff=(a.ff||0)+((a.brT>0?1:0)-(a.ff||0))*Math.min(1,dt*10); dragonPose(U,a.t,a.wk,a.ff); }
 function buildMesh(kind,lvl){ const K=BUILD_K[kind], g=new THREE.Group();
   if(kind==='tur'||kind==='mount'){ const t=tdTurretMesh(kind==='mount'?2:1); g.add(t); g.userData.head=t.userData.head; g.userData.bar=t.userData.bar;
     if(kind==='mount'){ t.position.y=.55; cy(g,0x6d4c41,.6,.7,.55,0,.27,0,.9); bx(g,0x8d6e63,.12,.55,.12,.45,.27,.45,.9); bx(g,0x8d6e63,.12,.55,.12,-.45,.27,-.45,.9); for(let k=0;k<4;k++) bx(g,0x5d4037,.32,.05,.06,.62,.1+k*.14,0,.9); g.userData.bar.position.y=2; } }

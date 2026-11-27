@@ -69,7 +69,7 @@ Le misure sono per un singolo modello: i polli arrivano in 4 e i mafiosi in 2.
 | <img src="Acquistabili/cavaliere.webp" width="120"> | **Cavaliere** | Alleato | 4 | 4 | 120 |
 | <img src="Acquistabili/mafiosi-italo-americani.webp" width="120"> | **Mafiosi italo-americani** | Alleato (×2) | 4 | 4 | 184 |
 | <img src="Acquistabili/mago-sul-cinghiale.webp" width="120"> | **Mago sul cinghiale** | Alleato | 7 | 7 | 1148 |
-| <img src="Acquistabili/drago-medievale.webp" width="120"> | **Drago medievale** | Alleato | 4 | 4 | 3724 |
+| <img src="Acquistabili/drago-medievale.webp" width="120"> | **Drago medievale** | Alleato | 8 | 8 | 1196 |
 | <img src="Acquistabili/lino-sassanelli.webp" width="120"> | **Lino Sassanelli** | Alleato | 8 | 8 | 556 |
 | <img src="Acquistabili/torretta.webp" width="120"> | **Torretta** | Costruzione | 4 | 4 | 220 |
 | <img src="Acquistabili/torretta-con-postazione.webp" width="120"> | **Torretta con postazione** | Costruzione | 5 | 5 | 420 |
@@ -82,7 +82,7 @@ Le misure sono per un singolo modello: i polli arrivano in 4 e i mafiosi in 2.
 | Render | Nome | Tipo · misure | Draw call | + ombre | Triangoli |
 |---|---|---|---:|---:|---:|
 | <img src="Mappe/il-bilocale.webp" width="220"> | **IL BILOCALE** | normale · 30×20 m | 82 | 77 | 41.732 |
-| <img src="Mappe/eta-della-pietra.webp" width="220"> | **ETÀ DELLA PIETRA** | normale · 30×20 m | 125 | 108 | 55.553 |
+| <img src="Mappe/eta-della-pietra.webp" width="220"> | **ETÀ DELLA PIETRA** | normale · 30×20 m | 122 | 105 | 56.921 |
 | <img src="Mappe/pianeta-xeno.webp" width="220"> | **PIANETA XENO** | normale · 30×20 m | 66 | 51 | 56.518 |
 | <img src="Mappe/arrembaggio.webp" width="220"> | **ARREMBAGGIO** | normale · 30×20 m | 56 | 53 | 25.368 |
 | <img src="Mappe/parco-aurora.webp" width="220"> | **PARCO AURORA** | normale · 30×20 m | 67 | 61 | 32.068 |
@@ -99,4 +99,4 @@ Le misure sono per un singolo modello: i polli arrivano in 4 e i mafiosi in 2.
 | <img src="Mappe/morioh-cho.webp" width="220"> | **MORIOH-CHO** | gigante · 76×34 m | 160 | 154 | 66.058 |
 | <img src="Mappe/villaggio-amazzonico.webp" width="220"> | **VILLAGGIO AMAZZONICO** | solo Basket · 30×20 m | 99 | 35 | 33.864 |
 | <img src="Mappe/spiaggia-tropicale.webp" width="220"> | **SPIAGGIA TROPICALE** | solo Basket · 30×20 m | 93 | 36 | 21.218 |
-| <img src="Mappe/stadio-tony-sport.webp" width="220"> | **STADIO TONY SPORT** | solo Basket · 30×20 m | 112 | 54 | 24.278 |
+| <img src="Mappe/stadio-tony-sport.webp" width="220"> | **STADIO TONY SPORT** | solo Basket · 30×20 m | 112 | 54 | 24.646 |
