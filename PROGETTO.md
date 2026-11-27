@@ -31,6 +31,8 @@ Gioco d’azione in 3D nel browser, da 1 a 8 giocatori sullo stesso schermo (tas
 | `index.html` | Tutto il gioco: stile, HTML e circa 8000 righe di JavaScript |
 | `manifest.webmanifest`, `icons/` | Icone e manifest per installare il gioco come app |
 | `cloudflare-worker/turn-worker.js` | Worker Cloudflare facoltativo che genera credenziali TURN temporanee (le chiavi stanno nel pannello di Cloudflare, non nel codice) |
+| `Grafiche/` | Render di personaggi, boss, acquistabili di Difendi la birra e mappe, con draw call e triangoli di ciascuno (indice in `Grafiche/README.md`) |
+| `strumenti/render-grafiche.mjs` | Rifà tutti i render e le misure: `node strumenti/render-grafiche.mjs` (serve Google Chrome) |
 | `README.md` | Titolo del repository e rimando a questo file |
 | `PROGETTO.md` | Questo documento |
 
