@@ -56,7 +56,10 @@ await ev(`(()=>{ if(typeof titleOn!=='undefined'&&titleOn) titleClose();
       const gr=g.createLinearGradient(0,0,0,S); gr.addColorStop(0,'#3a4670'); gr.addColorStop(1,'#151a2c'); g.fillStyle=gr; g.fillRect(0,0,S,S);
       const rg=g.createRadialGradient(S/2,S*.58,20,S/2,S*.58,S*.55); rg.addColorStop(0,'rgba(255,255,255,.16)'); rg.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=rg; g.fillRect(0,0,S,S);
       g.drawImage(r.domElement,0,0); g.fillStyle='#0e1220'; g.fillRect(0,S,S,120);
-      g.fillStyle='#ffd54f'; g.font='900 44px ui-monospace,Menlo,monospace'; g.textBaseline='top'; g.fillText(title,28,S+14);
+      // il titolo si rimpicciolisce se non c'entra accanto alla scritta di destra
+      g.font='700 22px ui-monospace,Menlo,monospace'; const subW=sub?g.measureText(sub).width+24:0; let fsz=44;
+      do{ g.font='900 '+fsz+'px ui-monospace,Menlo,monospace'; }while(g.measureText(title).width>S-56-subW&&(fsz-=2)>20);
+      g.fillStyle='#ffd54f'; g.textBaseline='top'; g.fillText(title,28,S+14+(44-fsz)/2);
       g.fillStyle='#e8ecf8'; g.font='700 28px ui-monospace,Menlo,monospace'; g.fillText(s.dc+' draw call (+'+s.sh+' ombre) · '+s.tri.toLocaleString('it-IT')+' triangoli',28,S+70);
       if(sub){ g.fillStyle='#9aa6c8'; g.font='700 22px ui-monospace,Menlo,monospace'; g.textAlign='right'; g.fillText(sub,S-28,S+22); g.textAlign='left'; }
       o.traverse(m=>{ if(m.geometry&&m.userData.own) m.geometry.dispose(); });
@@ -64,7 +67,7 @@ await ev(`(()=>{ if(typeof titleOn!=='undefined'&&titleOn) titleClose();
   return true; })()`);
 
 const save=(dir,name,png)=>{ const f=path.join(OUT,dir,slug(name)+'.webp'); fs.mkdirSync(path.dirname(f),{recursive:true}); fs.writeFileSync(f,Buffer.from(png.split(',')[1],'base64')); return path.basename(f); };
-const res={Personaggi:[],Boss:[],Acquistabili:[],Mappe:[]};
+const res={Personaggi:[],Boss:[],Acquistabili:[],Nemici:[],Mappe:[]};
 
 const nC=await ev('CHARS.length');
 for(let i=0;i<nC;i++){ const o=await ev(`(()=>{ const ch=CHARS[${i}], g=new THREE.Group(); const m=VOXB.has(ch.n)?VOXB.build(ch,g):buildChar(ch,g); shadowize(g); mergeStatic(g,true);
@@ -81,6 +84,11 @@ for(const [cat,k,n,cost,cnt] of items){ const o=await ev(`(()=>{ let g;
     if('${cat}'==='a'){ g=ALLY_K[BOT_K['${k}'].k].mk(); } else { g=buildMesh('${k}'); if(g.userData.bar) g.userData.bar.visible=false; }
     shadowize(g); mergeStatic(g,true); return __R.shot(g,${JSON.stringify(n.toUpperCase())},'${cat==='a'?'alleato':'costruzione'} · ${cost} 💰${cnt>1?' · ne arrivano '+cnt:''}'); })()`);
   res.Acquistabili.push({n,tipo:cat==='a'?'Alleato':'Costruzione',cnt,f:save('Acquistabili',n,o.png),dc:o.dc,sh:o.sh,tri:o.tri}); process.stdout.write('.'); }
+
+// nemici delle ondate (lo stesso modello che usa il gioco, senza l'anello colorato a terra)
+const NEMICI=[['v','Cavernicolo',"Difendi la birra · dall'ondata 12"],['p','Pinguino in monopattino elettrico',"Difendi la birra · dall'ondata 18 · kamikaze"]];
+for(const [t,n,sub] of NEMICI){ const o=await ev(`(()=>{ const g=makeMinion('${t}'); if(g.userData.ring) g.userData.ring.visible=false; shadowize(g); return __R.shot(g,${JSON.stringify(n.toUpperCase())},${JSON.stringify(sub)}); })()`);
+  res.Nemici.push({n,f:save('Nemici',n,o.png),dc:o.dc,sh:o.sh,tri:o.tri}); process.stdout.write('.'); }
 
 // ---------- mappe: il renderer del gioco, qualita' ALTA, vista dall'alto come in partita ----------
 await ev(`(()=>{ qAuto=false; setQuality(2); for(const id of ['menu','help','hud','banner','feed','msg','netPanel']){ const e=document.getElementById(id); if(e) e.style.visibility='hidden'; }
@@ -130,6 +138,10 @@ ${tab(res.Boss)}
 Le misure sono per un singolo modello: i polli arrivano in 4 e i mafiosi in 2.
 
 ${tab(res.Acquistabili,['Tipo',r=>r.tipo+(r.cnt>1?' (×'+r.cnt+')':'')])}
+
+## Nemici (${res.Nemici.length})
+
+${tab(res.Nemici)}
 
 ## Mappe (${res.Mappe.length})
 

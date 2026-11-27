@@ -5308,7 +5308,7 @@ function allyUpdate(dt){ const host=!NETON();
           if(a.bq>0){ a.bT-=dt; if(a.bT<=0){ a.bT=.09; a.bq--; const b=spawn(K.shot,a.x+Math.sin(a.ang)*.5,a.z+Math.cos(a.ang)*.5,a.ang+(K.burst?(Math.random()-.5)*.1:0),a.owner); b.special=true; b.dk=mk_; SFX.play(K.burst?'pew':'throw'); } }
           if(K.melee&&d<K.range+tR(foe)&&a.cd<=0){ a.cd=K.melee[1]; spHit(a.owner,foe,K.melee[0]*mk_,{push:.4}); fxAdd(foe.x,foe.z,.5,0xffffff,.7,.15); SFX.play('punch'); }
           if(K.breath&&d<K.range+tR(foe)&&a.cd<=0){ a.cd=K.breath[1]; for(const t of spTargets(a.owner)){ const dx=t.x-a.x, dz=t.z-a.z, dd=Math.hypot(dx,dz); if(dd>K.range+tR(t)) continue; let da=Math.atan2(dx,dz)-a.ang; da=Math.atan2(Math.sin(da),Math.cos(da)); if(Math.abs(da)<.7) spHit(a.owner,t,K.breath[0]*mk_,{burn:1.5}); }
-            a.brT=.7; for(let q=1;q<=3;q++) fxAdd(a.x+Math.sin(a.ang)*q,a.z+Math.cos(a.ang)*q,.55+q*.15,0xb55cff,.9,.25); SFX.play('flame'); }   // fiato viola del drago
+            a.brT=.7; for(let q=2;q<=4;q++) fxAdd(a.x+Math.sin(a.ang)*q,a.z+Math.cos(a.ang)*q,.55+q*.15,0xb55cff,1.6,.25); SFX.play('flame'); }   // fiato viola del drago
           if(a.kind==='cobra'&&d<K.range&&a.cd<=0){ a.cd=K.cd; for(let k=-2;k<=2;k++){ const b=spawn('venom',a.x,a.z,a.ang+k*.16,a.owner); b.special=true; } SFX.play('hiss'); } }
         else if(Math.hypot(a.owner.x-a.x,a.owner.z-a.z)>2.5){ const dx=a.owner.x-a.x, dz=a.owner.z-a.z, d=Math.hypot(dx,dz); mx=dx/d; mz=dz/d; a.ang=Math.atan2(dx,dz); }
         if(mx||mz){ const st=K.spd*dt; if(K.fly){ a.x=Math.max(.5,Math.min(W-.5,a.x+mx*st)); a.z=Math.max(.5,Math.min(H-.5,a.z+mz*st)); } else [a.x,a.z]=slideMove(a.x,a.z,mx*st,mz*st,K.r); a.mv=1; } else a.mv=0; }
@@ -5685,7 +5685,7 @@ Object.assign(ALLY_K,{
   knight:{hp:230,spd:2.6,r:.38,life:1e9,range:1.2,melee:[24,.9],mk:()=>knightMesh()},
   mafia:{hp:95,spd:2.8,r:.32,life:1e9,range:6,cd:1.3,burst:6,shot:'tommy',mk:()=>mafiaMesh()},
   wizard:{hp:160,spd:4.2,r:.42,life:1e9,range:6.5,cd:1.3,shot:'magic',mk:()=>wizardMesh()},
-  dragon:{hp:330,spd:3.2,r:.5,life:1e9,range:3,breath:[12,.3],mk:()=>dragonMesh2()},   // a terra: aggira i muri e i nemici lo possono colpire
+  dragon:{hp:330,spd:3.2,r:.75,life:1e9,range:4,breath:[12,.3],mk:()=>dragonMesh2()},   // a terra: aggira i muri e i nemici lo possono colpire
   lino:{hp:160,spd:1.7,r:.34,life:60,range:0,heal:5,mk:()=>linoMesh()},
 });
 // --- modelli ---
@@ -5713,7 +5713,7 @@ function linoMesh(){ const g=new THREE.Group(), SK=0xe8b08a, B=new THREE.Group()
 // Drago medievale (dal "Bestiario medievale"): cammina a terra (non vola), coda appiattita da varano, collo lungo, ali piccole da pipistrello, fiato viola.
 // Costruito a misura del file originale (unita' grandi) e rimpicciolito con DRG_S. Prestazioni: le parti ferme si fondono per gruppo
 // (corpo, 2 zampe, 2 ali, testa, mascella = una draw call ciascuno), collo e coda sono un'unica InstancedMesh di 33 cubi (una draw call). Niente luci.
-const DRG_S=.12, DRG_NN=9, DRG_TN=24, DRG_C={sk:0x3e4d2e,bl:0xcdbd8a,horn:0xd7ccb0,claw:0x2b2620,band:0xa89a4a,bone:0x2e2a25,mem:0x6a3f80};
+const DRG_S=.24, DRG_NN=9, DRG_TN=24, DRG_C={sk:0x3e4d2e,bl:0xcdbd8a,horn:0xd7ccb0,claw:0x2b2620,band:0xa89a4a,bone:0x2e2a25,mem:0x6a3f80};
 const DRG_NB=[[0,5.7,2],[0,7.2,3],[0,8.8,3.1],[0,9.9,3.9]];
 const DRG_IM=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.8,metalness:.05});
 // membrana dell'ala: triangoli sulle due facce (cosi' si fonde col resto dell'ala, niente materiale a doppia faccia)
@@ -5919,12 +5919,12 @@ Object.assign(PROJ,{
   magic:{speed:9,life:.75,r:.3,dmg:0,special:1,mesh:()=>mk(g=>{sp(g,0x7c4dff,.22,0,.9,0,true);sp(g,0x18ffff,.1,0,.9,0,true);}),onStop:()=>false,
     end:b=>{ if(NETON()) return; fxAdd(b.x,b.z,1.2,0x7c4dff,.6,.4); SFX.play('zap'); if(b.owner) spArea(b.owner,b.x,b.z,1.2,20*(b.dk||1)); }},
 });
-// --- due nemici nuovi nelle ondate alte: cavernicoli piccoli e pinguini in monopattino elettrico (kamikaze) ---
+// --- due nemici nuovi nelle ondate alte: cavernicoli e pinguini in monopattino elettrico (kamikaze), alti come gli alieni gialli ---
 function cavemanMesh(){ const g=new THREE.Group(), SK=0xd7a27a; [-1,1].forEach(s=>bx(g,SK,.1,.24,.1,s*.07,.12,0,.8)); bx(g,0x8d6e63,.28,.3,.2,0,.38,0,.95); bx(g,SK,.2,.2,.18,0,.66,0,.8); bx(g,0x3e2723,.24,.1,.2,0,.8,-.02,.9);
-  const c=cy(g,0x6d4c41,.05,.09,.5,.2,.5,.12,.9); c.rotation.x=-.6; const ring=new THREE.Mesh(MIN_RING,addMat(0x8d6e63,.6)); ring.rotation.x=-Math.PI/2; ring.position.y=.03; g.add(ring); const tip=new THREE.Object3D(); g.add(tip); Object.assign(g.userData,{tip,ring}); g.scale.setScalar(1.1); return dyn(g); }
+  const c=cy(g,0x6d4c41,.05,.09,.5,.2,.5,.12,.9); c.rotation.x=-.6; const ring=new THREE.Mesh(MIN_RING,addMat(0x8d6e63,.6)); ring.rotation.x=-Math.PI/2; ring.position.y=.03; g.add(ring); const tip=new THREE.Object3D(); g.add(tip); Object.assign(g.userData,{tip,ring}); g.scale.setScalar(2.2); return dyn(g); }
 function penguinMesh(){ const g=new THREE.Group(); ell(g,0x212121,.2,.3,.18,0,.55,0,.6); ell(g,0xfafafa,.14,.24,.08,0,.52,.1,.6); bx(g,0xffb300,.08,.04,.1,0,.74,.18,.5);
   bx(g,0x37474f,.16,.04,.6,0,.1,0,.4); cy(g,0x37474f,.02,.02,.7,0,.45,.27,.4); bx(g,0x37474f,.3,.03,.03,0,.8,.27,.4); [.25,-.25].forEach(z=>cy(g,0x111111,.07,.07,.05,0,.07,z,.8).rotation.z=Math.PI/2);
-  const ring=new THREE.Mesh(MIN_RING,addMat(0x29b6f6,.6)); ring.rotation.x=-Math.PI/2; ring.position.y=.03; g.add(ring); const tip=new THREE.Object3D(); g.add(tip); Object.assign(g.userData,{tip,ring}); g.scale.setScalar(1.15); return dyn(g); }
+  const ring=new THREE.Mesh(MIN_RING,addMat(0x29b6f6,.6)); ring.rotation.x=-Math.PI/2; ring.position.y=.03; g.add(ring); const tip=new THREE.Object3D(); g.add(tip); Object.assign(g.userData,{tip,ring}); g.scale.setScalar(2.2); return dyn(g); }
 
 // ================= BASKET (1v1, 2v2, 3v3): BALLERS contro HOOPERS =================
 // Palla: la prendi passandoci sopra. Con la palla puoi solo passare o tirare: tieni premuto lo sparo per caricare, rilascia nel punto giusto della barra
@@ -6429,7 +6429,7 @@ function minionsUpdate(dt){
     else m.mesh.position.set(m.x,.1+Math.abs(Math.sin(m.t*(m.type==='b'?5:9)*(m.slowT>0?.5:1)))*.12,m.z);
   }
 }
-const minionR=m=>m.type==='X'?(m.bd?m.bd.r:.9):m.type==='b'?(m.boss?.55:.48):m.type==='c'?.45:m.type==='m'?.3:m.type==='g'?.45:m.type==='v'?.3:m.type==='p'?.32:.32;
+const minionR=m=>m.type==='X'?(m.bd?m.bd.r:.9):m.type==='b'?(m.boss?.55:.48):m.type==='c'?.45:m.type==='m'?.3:m.type==='g'?.45:m.type==='v'?.32:m.type==='p'?.32:.32;
 // alieni in fiamme (frecce di Ida, teste di Giorgio): 6 danni ogni mezzo secondo
 function minionBurn(m,t,by){ m.burnT=Math.max(m.burnT||0,t); m.burnBy=by; }
 function minionPush(m,dx,dz,d){ const r=minionR(m); for(let k=0;k<8;k++){const nx=m.x+dx*d/8,nz=m.z+dz*d/8; if(!collides(nx,m.z,r))m.x=nx; if(!collides(m.x,nz,r))m.z=nz;} }

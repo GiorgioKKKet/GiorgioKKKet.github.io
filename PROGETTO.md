@@ -31,7 +31,7 @@ Gioco d’azione in 3D nel browser, da 1 a 8 giocatori sullo stesso schermo (tas
 | `index.html` | Tutto il gioco: stile, HTML e circa 8000 righe di JavaScript |
 | `manifest.webmanifest`, `icons/` | Icone e manifest per installare il gioco come app |
 | `cloudflare-worker/turn-worker.js` | Worker Cloudflare facoltativo che genera credenziali TURN temporanee (le chiavi stanno nel pannello di Cloudflare, non nel codice) |
-| `Grafiche/` | Render di personaggi, boss, acquistabili di Difendi la birra e mappe, con draw call e triangoli di ciascuno (indice in `Grafiche/README.md`) |
+| `Grafiche/` | Render di personaggi, boss, acquistabili di Difendi la birra, nemici e mappe, con draw call e triangoli di ciascuno (indice in `Grafiche/README.md`) |
 | `strumenti/render-grafiche.mjs` | Rifà tutti i render e le misure: `node strumenti/render-grafiche.mjs` (serve Google Chrome) |
 | `README.md` | Titolo del repository e rimando a questo file |
 | `PROGETTO.md` | Questo documento |
@@ -261,7 +261,7 @@ Controllati il codice e tutta la storia git: **non ci sono chiavi API né passwo
 ### Ultime modifiche
 - **Basket:** dopo ogni canestro tutte e due le squadre ripartono dal proprio canestro; la palla va alla squadra che ha subito.
 - **Azzone:** 6 pallettoni invece di 3, più ravvicinati, sempre nel cono di 30°, da 16 di danno l’uno (prima 20).
-- **Difendi la birra:** nuovo Drago medievale (dal bestiario): coda da varano, collo lungo e ali piccole, fiato viola. Non vola più: cammina a terra, aggira i muri e i nemici lo possono colpire.
+- **Difendi la birra:** nuovo Drago medievale (dal bestiario): coda da varano, collo lungo e ali piccole, fiato viola, grande circa il doppio di un giocatore. Non vola più: cammina a terra, aggira i muri e i nemici lo possono colpire.
 - **Sopravvivenza:** nella casella del giocatore si vedono solo gli aumenti totali di danno 💥, velocità 👟 e portata 🎯 presi alla slot, anche sul telefono (lì in piccolo, solo icona e percentuale).
 - **L’Atleta:** attacca più in fretta (ricarica da 0,8 a 0,55 s) e il selfie ha un raggio più largo (da 3,2 a 4,5).
 - **Rete:** tasto per chiudere la stanza (host) o uscirne (guest) e tornare al menu principale.

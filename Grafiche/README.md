@@ -77,12 +77,19 @@ Le misure sono per un singolo modello: i polli arrivano in 4 e i mafiosi in 2.
 | <img src="Acquistabili/vulcano.webp" width="120"> | **Vulcano** | Costruzione | 2 | 1 | 60 |
 | <img src="Acquistabili/allaccio-abusivo.webp" width="120"> | **Allaccio abusivo** | Costruzione | 4 | 4 | 452 |
 
+## Nemici (2)
+
+| Render | Nome | Draw call | + ombre | Triangoli |
+|---|---|---:|---:|---:|
+| <img src="Nemici/cavernicolo.webp" width="120"> | **Cavernicolo** | 3 | 3 | 124 |
+| <img src="Nemici/pinguino-in-monopattino-elettrico.webp" width="120"> | **Pinguino in monopattino elettrico** | 4 | 4 | 940 |
+
 ## Mappe (19)
 
 | Render | Nome | Tipo · misure | Draw call | + ombre | Triangoli |
 |---|---|---|---:|---:|---:|
 | <img src="Mappe/il-bilocale.webp" width="220"> | **IL BILOCALE** | normale · 30×20 m | 82 | 77 | 41.732 |
-| <img src="Mappe/eta-della-pietra.webp" width="220"> | **ETÀ DELLA PIETRA** | normale · 30×20 m | 122 | 105 | 56.921 |
+| <img src="Mappe/eta-della-pietra.webp" width="220"> | **ETÀ DELLA PIETRA** | normale · 30×20 m | 123 | 106 | 55.553 |
 | <img src="Mappe/pianeta-xeno.webp" width="220"> | **PIANETA XENO** | normale · 30×20 m | 66 | 51 | 56.518 |
 | <img src="Mappe/arrembaggio.webp" width="220"> | **ARREMBAGGIO** | normale · 30×20 m | 56 | 53 | 25.368 |
 | <img src="Mappe/parco-aurora.webp" width="220"> | **PARCO AURORA** | normale · 30×20 m | 67 | 61 | 32.068 |
@@ -99,4 +106,4 @@ Le misure sono per un singolo modello: i polli arrivano in 4 e i mafiosi in 2.
 | <img src="Mappe/morioh-cho.webp" width="220"> | **MORIOH-CHO** | gigante · 76×34 m | 160 | 154 | 66.058 |
 | <img src="Mappe/villaggio-amazzonico.webp" width="220"> | **VILLAGGIO AMAZZONICO** | solo Basket · 30×20 m | 99 | 35 | 33.864 |
 | <img src="Mappe/spiaggia-tropicale.webp" width="220"> | **SPIAGGIA TROPICALE** | solo Basket · 30×20 m | 93 | 36 | 21.218 |
-| <img src="Mappe/stadio-tony-sport.webp" width="220"> | **STADIO TONY SPORT** | solo Basket · 30×20 m | 112 | 54 | 24.646 |
+| <img src="Mappe/stadio-tony-sport.webp" width="220"> | **STADIO TONY SPORT** | solo Basket · 30×20 m | 112 | 54 | 24.278 |
