@@ -106,7 +106,7 @@ Ogni giocatore ha il suo colore: **P1 rosso, P2 blu, P3 verde, P4 giallo, P5 vio
 | **Uaims** | 220 | 0.9 | Piedone dal cielo (Media · fino a 83 ad area) | Pioggia di piedi: 6 piedoni in punti casuali della mappa. |
 | **Viki** | 90 | 1.28 | Nasone gigante (Corta · 50) | ZA WARDO: ferma il tempo per 3 s (si muove solo lei). |
 | **IL** | 80 | 1.35 | Birra gigante (Media · 32) | Cannone di birra per 3,2 s. |
-| **Azzone** | 200 | 0.77 | Angurie a pallettoni: 6 angurie ravvicinate a ventaglio (30°), medio raggio (Media · 20 ×6 a ventaglio (30°)) | Saltone in avanti: atterra con danno ad area (55, raggio 3, spinta e stordimento), come King Kong. |
+| **Azzone** | 200 | 0.77 | Angurie a pallettoni: 6 angurie ravvicinate a ventaglio (30°), medio raggio (Media · 16 ×6 a ventaglio (30°)) | Saltone in avanti: atterra con danno ad area (55, raggio 3, spinta e stordimento), come King Kong. |
 | **Marcow** | 100 | 1.2 | Zucchine esplosive (Lunga · fino a 38 ad area) | Cavalca Travis (gattone grigio scuro) per 10 s: travolge chi gli sta intorno. |
 | **Pio el Fuego Ardente** | 140 | 0.85 | Tridente di Poseidone: lo lancia e fa un'onda (Media · 34 perforante + onda 15) | Bolla protettiva: invincibile per 3 s. |
 | **Mastino Lavico** | 300 | 0.7 | Sputafuoco lavico (bruciatura) (Corta · 3 + bruciatura 20) | Sei mastini kamikaze. |
@@ -213,7 +213,7 @@ Le costruzioni non si possono piazzare sopra o addosso a un giocatore, a un nemi
 
 ## Sopravvivenza: slot d’oro
 
-Ogni giocatore la può usare una volta ogni 3 ondate. Dopo il risultato il gioco riparte in **2 secondi**. Chi viene eliminato rientra da solo **dopo 5 ondate**. I potenziamenti presi compaiono sotto la barra del giocatore, in alto.
+Ogni giocatore la può usare una volta ogni 3 ondate. Dopo il risultato il gioco riparte in **2 secondi**. Chi viene eliminato rientra da solo **dopo 5 ondate**. Sotto la barra del giocatore, in alto, compaiono solo gli aumenti **totali** di danno, velocità e portata. I bonus si moltiplicano tra loro: Danno +5% e poi +7% fanno +12%, Velocità +10% due volte fa +21%.
 
 | Rarità | Bonus |
 |---|---|
@@ -258,7 +258,8 @@ Controllati il codice e tutta la storia git: **non ci sono chiavi API né passwo
 
 ### Ultime modifiche
 - **Basket:** dopo ogni canestro tutte e due le squadre ripartono dal proprio canestro; la palla va alla squadra che ha subito.
-- **Azzone:** 6 pallettoni invece di 3, più ravvicinati, sempre nel cono di 30°.
+- **Azzone:** 6 pallettoni invece di 3, più ravvicinati, sempre nel cono di 30°, da 16 di danno l’uno (prima 20).
+- **Sopravvivenza:** nella casella del giocatore si vedono solo gli aumenti totali di danno 💥, velocità 👟 e portata 🎯 presi alla slot, anche sul telefono (lì in piccolo, solo icona e percentuale).
 - **L’Atleta:** attacca più in fretta (ricarica da 0,8 a 0,55 s) e il selfie ha un raggio più largo (da 3,2 a 4,5).
 - **Rete:** tasto per chiudere la stanza (host) o uscirne (guest) e tornare al menu principale.
 
